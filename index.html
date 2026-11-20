@@ -3,7 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Fast, offline-capable Pokémon team planner with generation-accurate mechanics, type analysis, smart recommendations, and campaign journey planning."
+    />
     <title>Pokémon Team Planner</title>
+    <script>
+      (() => {
+        try {
+          const saved = localStorage.getItem('pokeplanner:theme');
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (saved === 'dark' || (!saved && prefersDark)) {
+            document.documentElement.classList.add('dark');
+          }
+        } catch {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

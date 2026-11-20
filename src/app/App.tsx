@@ -1,10 +1,21 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { RouterProvider } from '@tanstack/react-router';
+import { router } from './router';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 60 * 24,
+      gcTime: 1000 * 60 * 60 * 24 * 7,
+      retry: 1,
+    },
+  },
+});
+
 export function App() {
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-50 p-6">
-      <h1 className="text-2xl font-bold tracking-tight">Pokémon Team Planner</h1>
-      <p className="mt-2 text-sm text-slate-400">
-        Phase 1 foundation initialized. Core mechanics engine active.
-      </p>
-    </main>
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
   );
 }

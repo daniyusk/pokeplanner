@@ -67,7 +67,7 @@ function mapSpecies(
       : [];
 
   return {
-    slug: raw.id,
+    slug: toID(raw.name),
     name: raw.name,
     dexNumber: raw.num,
     spriteId: computeSpriteId(raw.baseSpecies, raw.forme),
@@ -97,7 +97,7 @@ function mapMove(
   if (!raw || !isStandardType(raw.type)) return undefined;
 
   return {
-    slug: raw.id,
+    slug: toID(raw.name),
     name: raw.name,
     type: raw.type,
     category: raw.category,
