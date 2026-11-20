@@ -1,11 +1,12 @@
 import * as Dialog from '@radix-ui/react-dialog';
-import { ArrowRight, Search, Sparkles, Trash2, X } from 'lucide-react';
+import { ArrowRight, Check, Search, Sparkles, Trash2, Wand2, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { PokemonSprite } from '@/components/pokemon/PokemonSprite';
 import { TypeBadge } from '@/components/pokemon/TypeBadge';
 import { TYPE_COLOR_VARS } from '@/components/pokemon/TypeIcon';
 import { pkmnDexGateway } from '@/data/dex/pkmnDexGateway';
 import { getAvailableTypes, getEffectiveMoveCategory } from '@/domain/mechanics';
+import { recommendBuildForMember } from '@/domain/recommendations';
 import type { MoveData, PokemonType } from '@/domain/types';
 import { useTeamStore } from '@/stores/useTeamStore';
 
@@ -85,9 +86,29 @@ export function BuildDrawer() {
     return filtered.slice(0, 60);
   }, [context.generation, learnableSlugs, moveQuery, showAllMoves]);
 
+  const [appliedAutoBuild, setAppliedAutoBuild] = useState(false);
+
+  const recommendedBuild = useMemo(() => {
+    if (editingSlotIndex === null || !member || !species) return undefined;
+    const learnableList = learnableSlugs ? Array.from(learnableSlugs) : undefined;
+    return recommendBuildForMember(editingSlotIndex, team, context, pkmnDexGateway, learnableList);
+  }, [context, editingSlotIndex, learnableSlugs, member, species, team]);
+
   if (editingSlotIndex === null || !member || !species) {
     return null;
   }
+
+  const handleApplyAutoBuild = () => {
+    if (!recommendedBuild) return;
+    updateSlotMember(editingSlotIndex, {
+      ...(recommendedBuild.ability ? { abilitySlug: recommendedBuild.ability.slug } : {}),
+      ...(recommendedBuild.item ? { itemSlug: recommendedBuild.item.slug } : {}),
+      ...(recommendedBuild.nature ? { natureId: recommendedBuild.nature.id } : {}),
+      moveSlugs: recommendedBuild.moves.map((m) => m.move.slug),
+    });
+    setAppliedAutoBuild(true);
+    setTimeout(() => setAppliedAutoBuild(false), 1600);
+  };
 
   const toggleMove = (move: MoveData) => {
     const current = [...member.moveSlugs];
@@ -210,6 +231,70 @@ export function BuildDrawer() {
                 </div>
               )}
             </div>
+
+            {/* Smart Auto-Build Card */}
+            {recommendedBuild && (
+              <div className="space-y-2.5 rounded-xl border border-[var(--accent-primary)]/35 bg-[var(--accent-primary)]/6 p-3.5">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--ink-primary)]">
+                    <Wand2
+                      className="h-3.5 w-3.5 text-[var(--accent-primary)]"
+                      aria-hidden="true"
+                    />
+                    <span>Recommended Build for Team</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleApplyAutoBuild}
+                    className="inline-flex h-7 items-center gap-1 rounded-md bg-[var(--accent-primary)] px-2.5 text-[11px] font-semibold text-[var(--accent-ink)] transition hover:bg-[var(--accent-primary-hover)]"
+                  >
+                    {appliedAutoBuild ? (
+                      <>
+                        <Check className="h-3 w-3" />
+                        <span>Applied</span>
+                      </>
+                    ) : (
+                      <span>Auto-Fill Build</span>
+                    )}
+                  </button>
+                </div>
+
+                <ul className="space-y-1 text-[11px] text-[var(--ink-secondary)]">
+                  {recommendedBuild.ability && (
+                    <li>
+                      <strong className="text-[var(--ink-primary)]">
+                        {recommendedBuild.ability.name}:
+                      </strong>{' '}
+                      {recommendedBuild.ability.reason}
+                    </li>
+                  )}
+                  {recommendedBuild.item && (
+                    <li>
+                      <strong className="text-[var(--ink-primary)]">
+                        @ {recommendedBuild.item.name}:
+                      </strong>{' '}
+                      {recommendedBuild.item.reason}
+                    </li>
+                  )}
+                  {recommendedBuild.nature && (
+                    <li>
+                      <strong className="text-[var(--ink-primary)]">
+                        {recommendedBuild.nature.name} Nature:
+                      </strong>{' '}
+                      {recommendedBuild.nature.reason}
+                    </li>
+                  )}
+                  {recommendedBuild.moves.length > 0 && (
+                    <li>
+                      <strong className="text-[var(--ink-primary)]">Moves:</strong>{' '}
+                      {recommendedBuild.moves
+                        .map((m) => `${m.move.name} (${m.reason})`)
+                        .join(' · ')}
+                    </li>
+                  )}
+                </ul>
+              </div>
+            )}
 
             {/* Nickname */}
             <div>

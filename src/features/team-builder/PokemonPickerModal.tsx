@@ -1,11 +1,12 @@
 import * as Dialog from '@radix-ui/react-dialog';
-import { Search, X } from 'lucide-react';
+import { Search, Sparkles, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { PokemonSprite } from '@/components/pokemon/PokemonSprite';
 import { TypeBadge } from '@/components/pokemon/TypeBadge';
 import { TYPE_COLOR_VARS, TypeIcon } from '@/components/pokemon/TypeIcon';
 import { pkmnDexGateway } from '@/data/dex/pkmnDexGateway';
 import { getAvailableTypes } from '@/domain/mechanics';
+import { recommendPokemonForTeam } from '@/domain/recommendations';
 import type { PokemonType, SpeciesData } from '@/domain/types';
 import { useTeamStore } from '@/stores/useTeamStore';
 
@@ -19,11 +20,13 @@ function computeBst(species: SpeciesData): number {
 export function PokemonPickerModal() {
   const pickerSlotIndex = useTeamStore((s) => s.pickerSlotIndex);
   const context = useTeamStore((s) => s.context);
+  const team = useTeamStore((s) => s.team);
   const closePicker = useTeamStore((s) => s.closePicker);
   const setSlotSpecies = useTeamStore((s) => s.setSlotSpecies);
 
   const [query, setQuery] = useState('');
   const [selectedTypes, setSelectedTypes] = useState<PokemonType[]>([]);
+  const [onlyRecommended, setOnlyRecommended] = useState(false);
   const [limit, setLimit] = useState(PAGE_SIZE);
   const [activeIndex, setActiveIndex] = useState(0);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -34,6 +37,7 @@ export function PokemonPickerModal() {
     if (isOpen) {
       setQuery('');
       setSelectedTypes([]);
+      setOnlyRecommended(false);
       setLimit(PAGE_SIZE);
       setActiveIndex(0);
     }
@@ -49,9 +53,23 @@ export function PokemonPickerModal() {
     [context.generation],
   );
 
+  const recommendedMap = useMemo(() => {
+    if (!isOpen || !onlyRecommended) return null;
+    const recs = recommendPokemonForTeam(team, context, pkmnDexGateway, {
+      limit: 36,
+      excludeLegendaries: true,
+      ...(pickerSlotIndex !== null ? { replaceSlotIndex: pickerSlotIndex } : {}),
+    });
+    return new Map(recs.map((r) => [r.species.slug, r]));
+  }, [context, isOpen, onlyRecommended, pickerSlotIndex, team]);
+
   const filteredSpecies = useMemo(() => {
     const trimmed = query.trim().toLowerCase();
-    return allSpecies.filter((species) => {
+    const baseList = recommendedMap
+      ? Array.from(recommendedMap.values()).map((r) => r.species)
+      : allSpecies;
+
+    return baseList.filter((species) => {
       if (selectedTypes.length > 0) {
         const hasAllTypes = selectedTypes.every((t) => species.types.includes(t));
         if (!hasAllTypes) return false;
@@ -60,7 +78,7 @@ export function PokemonPickerModal() {
       const dexMatch = String(species.dexNumber).includes(trimmed.replace(/^#/, ''));
       return species.name.toLowerCase().includes(trimmed) || dexMatch;
     });
-  }, [allSpecies, query, selectedTypes]);
+  }, [allSpecies, query, recommendedMap, selectedTypes]);
 
   const visibleSpecies = useMemo(() => filteredSpecies.slice(0, limit), [filteredSpecies, limit]);
 
@@ -123,25 +141,44 @@ export function PokemonPickerModal() {
 
           {/* Search & Type Filter Bar */}
           <div className="space-y-3 border-b border-[var(--border-subtle)] bg-[var(--surface-elevated)] px-5 py-3.5">
-            <div className="relative">
-              <Search
-                className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[var(--ink-muted)]"
-                aria-hidden="true"
-              />
-              <input
-                ref={searchInputRef}
-                type="search"
-                value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value);
-                  setLimit(PAGE_SIZE);
+            <div className="flex flex-wrap gap-2">
+              <div className="relative flex-1 min-w-[14rem]">
+                <Search
+                  className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[var(--ink-muted)]"
+                  aria-hidden="true"
+                />
+                <input
+                  ref={searchInputRef}
+                  type="search"
+                  value={query}
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                    setLimit(PAGE_SIZE);
+                    setActiveIndex(0);
+                  }}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Search Pokémon by name or #dex number..."
+                  aria-label="Search Pokémon"
+                  className="h-10 w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] pr-3 pl-9 text-sm text-[var(--ink-primary)] placeholder:text-[var(--ink-muted)]"
+                />
+              </div>
+
+              <button
+                type="button"
+                aria-pressed={onlyRecommended}
+                onClick={() => {
+                  setOnlyRecommended((prev) => !prev);
                   setActiveIndex(0);
                 }}
-                onKeyDown={handleKeyDown}
-                placeholder="Search Pokémon by name or #dex number..."
-                aria-label="Search Pokémon"
-                className="h-10 w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] pr-3 pl-9 text-sm text-[var(--ink-primary)] placeholder:text-[var(--ink-muted)]"
-              />
+                className={`inline-flex h-10 items-center gap-1.5 rounded-xl border px-3.5 text-xs font-semibold transition ${
+                  onlyRecommended
+                    ? 'border-[var(--accent-primary)] bg-[var(--accent-primary)] text-[var(--accent-ink)]'
+                    : 'border-[var(--border-subtle)] bg-[var(--surface-card)] text-[var(--ink-primary)] hover:border-[var(--border-strong)]'
+                }`}
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                <span>Recommended</span>
+              </button>
             </div>
 
             <fieldset className="flex flex-wrap items-center gap-1.5 border-0 p-0">

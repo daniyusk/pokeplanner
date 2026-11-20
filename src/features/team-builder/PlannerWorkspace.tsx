@@ -1,10 +1,11 @@
 import { useNavigate, useSearch } from '@tanstack/react-router';
-import { AlertTriangle, X } from 'lucide-react';
+import { AlertTriangle, BarChart2, Sparkles, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { pkmnDexGateway } from '@/data/dex/pkmnDexGateway';
 import { getThemePreference, setThemePreference, type ThemeMode } from '@/data/storage/teamStorage';
 import { decodeTeamFromSearchParams, encodeTeamToSearchParams } from '@/domain/sharing';
 import type { TeamSlotIndex } from '@/domain/types';
+import { SmartRecommendationsPanel } from '@/features/smart-recommendations/SmartRecommendationsPanel';
 import { TeamAnalysisSection } from '@/features/team-analysis/TeamAnalysisSection';
 import { SavedTeamsModal } from '@/features/team-sharing/SavedTeamsModal';
 import { ShareShowdownModal } from '@/features/team-sharing/ShareShowdownModal';
@@ -29,6 +30,7 @@ export function PlannerWorkspace() {
   const loadSavedTeams = useTeamStore((s) => s.loadSavedTeams);
 
   const [theme, setTheme] = useState<ThemeMode>(() => getThemePreference());
+  const [workspaceTab, setWorkspaceTab] = useState<'analysis' | 'recommendations'>('analysis');
   const [showdownOpen, setShowdownOpen] = useState(false);
   const [savedOpen, setSavedOpen] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
@@ -183,7 +185,36 @@ export function PlannerWorkspace() {
         )}
 
         <TeamDock />
-        <TeamAnalysisSection />
+
+        {/* Workspace Section Switcher */}
+        <div className="flex flex-wrap items-center gap-2 border-b border-[var(--border-subtle)] pb-3">
+          <button
+            type="button"
+            onClick={() => setWorkspaceTab('analysis')}
+            className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold transition ${
+              workspaceTab === 'analysis'
+                ? 'bg-[var(--ink-primary)] text-[var(--surface-card)]'
+                : 'border border-[var(--border-subtle)] bg-[var(--surface-card)] text-[var(--ink-secondary)] hover:border-[var(--border-strong)]'
+            }`}
+          >
+            <BarChart2 className="h-3.5 w-3.5" />
+            <span>Team Analysis</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setWorkspaceTab('recommendations')}
+            className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold transition ${
+              workspaceTab === 'recommendations'
+                ? 'bg-[var(--ink-primary)] text-[var(--surface-card)]'
+                : 'border border-[var(--border-subtle)] bg-[var(--surface-card)] text-[var(--ink-secondary)] hover:border-[var(--border-strong)]'
+            }`}
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>Smart Recommendations</span>
+          </button>
+        </div>
+
+        {workspaceTab === 'analysis' ? <TeamAnalysisSection /> : <SmartRecommendationsPanel />}
       </main>
 
       <PokemonPickerModal />
