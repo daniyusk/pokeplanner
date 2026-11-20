@@ -66,6 +66,10 @@ function mapSpecies(
       ? raw.otherFormes.map((f) => toID(f))
       : [];
 
+  const isLegendary = raw.tags.some(
+    (tag) => tag === 'Restricted Legendary' || tag === 'Sub-Legendary' || tag === 'Mythical',
+  );
+
   return {
     slug: toID(raw.name),
     name: raw.name,
@@ -85,6 +89,7 @@ function mapSpecies(
     ...(raw.forme ? { forme: raw.forme } : {}),
     otherFormeSlugs,
     isMega: Boolean(raw.isMega),
+    isLegendary,
     nfe: raw.nfe,
     ...(raw.prevo ? { prevoSlug: toID(raw.prevo) } : {}),
     evoSlugs: raw.evos ? raw.evos.map((e) => toID(e)) : [],

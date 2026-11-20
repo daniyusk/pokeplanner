@@ -24,6 +24,7 @@ export interface SpeciesData {
   forme?: string;
   otherFormeSlugs: readonly SpeciesSlug[];
   isMega: boolean;
+  isLegendary: boolean;
   nfe: boolean;
   prevoSlug?: SpeciesSlug;
   evoSlugs: readonly SpeciesSlug[];
