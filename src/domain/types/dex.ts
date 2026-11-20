@@ -16,11 +16,13 @@ export interface SpeciesData {
   slug: SpeciesSlug;
   name: string;
   dexNumber: number;
+  spriteId: string;
   types: readonly [PokemonType] | readonly [PokemonType, PokemonType];
   baseStats: StatsTable;
   abilities: readonly AbilitySlug[];
   baseSpeciesSlug: SpeciesSlug;
   forme?: string;
+  otherFormeSlugs: readonly SpeciesSlug[];
   isMega: boolean;
   nfe: boolean;
   prevoSlug?: SpeciesSlug;
@@ -72,4 +74,10 @@ export interface DexGateway {
   getNature(name: string, generation: GenerationNumber): NatureData | undefined;
   listSpecies(generation: GenerationNumber): readonly SpeciesData[];
   listMoves(generation: GenerationNumber): readonly MoveData[];
+  listItems(generation: GenerationNumber): readonly ItemData[];
+  listNatures(generation: GenerationNumber): readonly NatureData[];
+  getLearnableMoveSlugs(
+    speciesSlug: string,
+    generation: GenerationNumber,
+  ): Promise<readonly MoveSlug[]>;
 }

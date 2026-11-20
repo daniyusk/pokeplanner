@@ -36,4 +36,19 @@ describe('pkmnDexGateway Seam', () => {
     expect(gen5Moves.some((m) => m.slug === 'scald')).toBe(true);
     expect(gen5Moves.some((m) => m.slug === 'moonblast')).toBe(false);
   });
+
+  it('lists items, natures, alternate forms, and learnable moves accurately', async () => {
+    expect(pkmnDexGateway.listItems(1)).toHaveLength(0);
+    expect(pkmnDexGateway.listItems(5).some((i) => i.slug === 'leftovers')).toBe(true);
+
+    expect(pkmnDexGateway.listNatures(2)).toHaveLength(0);
+    expect(pkmnDexGateway.listNatures(5)).toHaveLength(25);
+
+    const rotom = pkmnDexGateway.getSpecies('rotom', 5);
+    expect(rotom?.otherFormeSlugs).toContain('rotomwash');
+
+    const garchompMoves = await pkmnDexGateway.getLearnableMoveSlugs('garchomp', 5);
+    expect(garchompMoves).toContain('earthquake');
+    expect(garchompMoves).toContain('dragonclaw');
+  });
 });

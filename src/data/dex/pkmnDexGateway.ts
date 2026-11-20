@@ -26,6 +26,14 @@ const generations = new Generations(Dex as unknown as PkmnDexInterface);
 const availableTypesCache = new Map<GenerationNumber, readonly PokemonType[]>();
 const speciesListCache = new Map<GenerationNumber, readonly SpeciesData[]>();
 const movesListCache = new Map<GenerationNumber, readonly MoveData[]>();
+const itemsListCache = new Map<GenerationNumber, readonly ItemData[]>();
+const naturesListCache = new Map<GenerationNumber, readonly NatureData[]>();
+
+function computeSpriteId(baseSpecies: string, forme: string): string {
+  const baseId = toID(baseSpecies);
+  if (!forme) return baseId;
+  return `${baseId}-${toID(forme)}`;
+}
 
 function mapSpecies(
   raw: ReturnType<ReturnType<Generations['get']>['species']['get']>,
@@ -51,10 +59,18 @@ function mapSpecies(
     }
   }
 
+  const baseSpeciesSlug = toID(raw.baseSpecies);
+  const otherFormeSlugs = raw.formes
+    ? raw.formes.map((f) => toID(f)).filter((id) => id !== raw.id)
+    : raw.otherFormes
+      ? raw.otherFormes.map((f) => toID(f))
+      : [];
+
   return {
     slug: raw.id,
     name: raw.name,
     dexNumber: raw.num,
+    spriteId: computeSpriteId(raw.baseSpecies, raw.forme),
     types,
     baseStats: {
       hp: raw.baseStats.hp,
@@ -65,8 +81,9 @@ function mapSpecies(
       spe: raw.baseStats.spe,
     },
     abilities: abilitySlugs,
-    baseSpeciesSlug: toID(raw.baseSpecies),
+    baseSpeciesSlug,
     ...(raw.forme ? { forme: raw.forme } : {}),
+    otherFormeSlugs,
     isMega: Boolean(raw.isMega),
     nfe: raw.nfe,
     ...(raw.prevo ? { prevoSlug: toID(raw.prevo) } : {}),
@@ -197,5 +214,51 @@ export const pkmnDexGateway: DexGateway = {
     list.sort((a, b) => a.name.localeCompare(b.name));
     movesListCache.set(generation, list);
     return list;
+  },
+
+  listItems(generation: GenerationNumber): readonly ItemData[] {
+    if (generation < 2) return [];
+    const cached = itemsListCache.get(generation);
+    if (cached) return cached;
+
+    const gen = generations.get(generation);
+    const list: ItemData[] = [];
+    for (const raw of gen.items) {
+      list.push({
+        slug: raw.id,
+        name: raw.name,
+        shortDesc: raw.shortDesc,
+      });
+    }
+    list.sort((a, b) => a.name.localeCompare(b.name));
+    itemsListCache.set(generation, list);
+    return list;
+  },
+
+  listNatures(generation: GenerationNumber): readonly NatureData[] {
+    if (generation < 3) return [];
+    const cached = naturesListCache.get(generation);
+    if (cached) return cached;
+
+    const gen = generations.get(generation);
+    const list: NatureData[] = [];
+    for (const raw of gen.natures) {
+      list.push({
+        id: raw.name,
+        name: raw.name,
+        ...(raw.plus ? { plus: raw.plus as Exclude<StatId, 'hp'> } : {}),
+        ...(raw.minus ? { minus: raw.minus as Exclude<StatId, 'hp'> } : {}),
+      });
+    }
+    list.sort((a, b) => a.name.localeCompare(b.name));
+    naturesListCache.set(generation, list);
+    return list;
+  },
+
+  async getLearnableMoveSlugs(speciesSlug: string, generation: GenerationNumber) {
+    const gen = generations.get(generation);
+    const learnable = await gen.learnsets.learnable(speciesSlug);
+    if (!learnable) return [];
+    return Object.keys(learnable);
   },
 };

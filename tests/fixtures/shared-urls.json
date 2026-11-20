@@ -1,0 +1,24 @@
+{
+  "compactGen5": {
+    "params": {
+      "g": "5",
+      "s": "serperior,lucario,volcarona,jellicent,krookodile,haxorus"
+    },
+    "expectedGeneration": 5,
+    "expectedSpecies": ["serperior", "lucario", "volcarona", "jellicent", "krookodile", "haxorus"]
+  },
+  "v1Gen5Builds": {
+    "params": {
+      "p": "v1_N4IgbiBcCMA0IFsogGYCcCmGTwOZQFZ4AXAO2QFVSB7MAQwAIBhACzoQAccRioBtPiADOGNB1EBLamm4BjaqWJo6aAJ7cANhhTFaood2ISEEgCY5BWuiiG60SeKeW4FHAK4aR3FmdMZSHNQA7qIoEpjcQm4ARrYSxG7E2AC6sKQeGmkZWRoaqYIA1mjU1AXUphJa3AjUAB4S2PCyLNQSshhCsioo3ABW1LnqsIIYKsQsAI5udAWNILJobqTNkbqkWKa4c1HiYsGiIKnpuTmZx3mnl+enyQC+QA"
+    },
+    "expectedTeamName": "Unova Champ",
+    "expectedGeneration": 5,
+    "expectedFirstSlot": {
+      "speciesSlug": "serperior",
+      "abilitySlug": "contrary",
+      "itemSlug": "leftovers",
+      "natureId": "Timid",
+      "moveSlugs": ["leafstorm", "dragonpulse", "hiddenpowerfire", "substitute"]
+    }
+  }
+}
