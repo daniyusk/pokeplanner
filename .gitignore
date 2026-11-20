@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+dist-ssr/
+
+# Testing & coverage
+coverage/
+playwright-report/
+test-results/
+
+# Local environment & caches
+.env
+.env.local
+.env.*.local
+.vite/
+*.tsbuildinfo
+
+# OS & Editor artifacts
+.DS_Store
+Thumbs.db
+*.log
