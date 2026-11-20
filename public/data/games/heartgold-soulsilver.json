@@ -1,0 +1,2665 @@
+{
+  "id": "heartgold-soulsilver",
+  "name": "Pokémon HeartGold / SoulSilver",
+  "shortName": "HGSS",
+  "generation": 4,
+  "region": "Johto",
+  "versionGroup": "heartgold-soulsilver",
+  "versions": [
+    {
+      "id": "heartgold",
+      "name": "HeartGold"
+    },
+    {
+      "id": "soulsilver",
+      "name": "SoulSilver"
+    }
+  ],
+  "mechanics": {
+    "hasAbilities": true,
+    "hasHeldItems": true,
+    "hasNatures": true,
+    "physicalSpecialSplit": true,
+    "gimmick": null
+  },
+  "checkpoints": [
+    {
+      "id": "gym-1-falkner",
+      "order": 1,
+      "name": "Gym 1 — Falkner (Violet)",
+      "category": "gym",
+      "levelCap": 13,
+      "specialtyType": "Flying",
+      "bossName": "Falkner",
+      "bossNotablePokemon": ["pidgey", "pidgeotto"],
+      "unlockedLocations": [
+        "New Bark Town",
+        "Route 29",
+        "Route 30",
+        "Route 31",
+        "Dark Cave",
+        "Sprout Tower"
+      ]
+    },
+    {
+      "id": "gym-2-bugsy",
+      "order": 2,
+      "name": "Gym 2 — Bugsy (Azalea)",
+      "category": "gym",
+      "levelCap": 17,
+      "specialtyType": "Bug",
+      "bossName": "Bugsy",
+      "bossNotablePokemon": ["metapod", "kakuna", "scyther"],
+      "unlockedLocations": ["Route 32", "Union Cave", "Route 33", "Slowpoke Well", "Ilex Forest"]
+    },
+    {
+      "id": "gym-3-whitney",
+      "order": 3,
+      "name": "Gym 3 — Whitney (Goldenrod)",
+      "category": "gym",
+      "levelCap": 19,
+      "specialtyType": "Normal",
+      "bossName": "Whitney",
+      "bossNotablePokemon": ["clefairy", "miltank"],
+      "unlockedLocations": ["Route 34", "Goldenrod City", "Route 35", "National Park"]
+    },
+    {
+      "id": "gym-4-morty",
+      "order": 4,
+      "name": "Gym 4 — Morty (Ecruteak)",
+      "category": "gym",
+      "levelCap": 25,
+      "specialtyType": "Ghost",
+      "bossName": "Morty",
+      "bossNotablePokemon": ["gastly", "haunter", "gengar"],
+      "unlockedLocations": ["Route 36", "Route 37", "Burned Tower", "Route 38", "Route 39"]
+    },
+    {
+      "id": "gym-5-chuck",
+      "order": 5,
+      "name": "Gym 5 — Chuck (Cianwood)",
+      "category": "gym",
+      "levelCap": 31,
+      "specialtyType": "Fighting",
+      "bossName": "Chuck",
+      "bossNotablePokemon": ["primeape", "poliwrath"],
+      "unlockedLocations": ["Olivine City", "Route 40", "Route 41", "Cianwood City"]
+    },
+    {
+      "id": "gym-6-jasmine",
+      "order": 6,
+      "name": "Gym 6 — Jasmine (Olivine)",
+      "category": "gym",
+      "levelCap": 35,
+      "specialtyType": "Steel",
+      "bossName": "Jasmine",
+      "bossNotablePokemon": ["magnemite", "steelix"],
+      "unlockedLocations": ["Olivine Lighthouse", "Safari Zone (HGSS)"]
+    },
+    {
+      "id": "gym-7-pryce",
+      "order": 7,
+      "name": "Gym 7 — Pryce (Mahogany)",
+      "category": "gym",
+      "levelCap": 34,
+      "specialtyType": "Ice",
+      "bossName": "Pryce",
+      "bossNotablePokemon": ["seel", "dewgong", "piloswine"],
+      "unlockedLocations": ["Route 42", "Mt. Mortar", "Route 43", "Lake of Rage"]
+    },
+    {
+      "id": "gym-8-clair",
+      "order": 8,
+      "name": "Gym 8 — Clair (Blackthorn)",
+      "category": "gym",
+      "levelCap": 41,
+      "specialtyType": "Dragon",
+      "bossName": "Clair",
+      "bossNotablePokemon": ["gyarados", "dragonair", "kingdra"],
+      "unlockedLocations": ["Ice Path", "Route 44", "Dragon’s Den", "Route 45"]
+    },
+    {
+      "id": "champion-lance",
+      "order": 9,
+      "name": "Elite Four & Champion Lance",
+      "category": "champion",
+      "levelCap": 50,
+      "bossName": "Lance",
+      "bossNotablePokemon": ["gyarados", "dragonite", "aerodactyl", "charizard"],
+      "unlockedLocations": ["Route 27", "Victory Road", "Indigo Plateau"]
+    }
+  ],
+  "dex": {
+    "chikorita": {
+      "regionalDexNumber": 1,
+      "availability": "starter",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "New Bark Town (Starter)",
+          "method": "starter",
+          "minLevel": 5,
+          "maxLevel": 5
+        }
+      ]
+    },
+    "cyndaquil": {
+      "regionalDexNumber": 2,
+      "availability": "starter",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "New Bark Town (Starter)",
+          "method": "starter",
+          "minLevel": 5,
+          "maxLevel": 5
+        }
+      ]
+    },
+    "totodile": {
+      "regionalDexNumber": 3,
+      "availability": "starter",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "New Bark Town (Starter)",
+          "method": "starter",
+          "minLevel": 5,
+          "maxLevel": 5
+        }
+      ]
+    },
+    "pidgey": {
+      "regionalDexNumber": 4,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Routes 29–31",
+          "method": "grass",
+          "minLevel": 2,
+          "maxLevel": 6
+        }
+      ]
+    },
+    "sentret": {
+      "regionalDexNumber": 5,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Routes 29–31",
+          "method": "grass",
+          "minLevel": 2,
+          "maxLevel": 6
+        }
+      ]
+    },
+    "hoothoot": {
+      "regionalDexNumber": 6,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Routes 29–31",
+          "method": "grass",
+          "minLevel": 2,
+          "maxLevel": 6
+        }
+      ]
+    },
+    "rattata": {
+      "regionalDexNumber": 7,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Routes 29–31",
+          "method": "grass",
+          "minLevel": 2,
+          "maxLevel": 6
+        }
+      ]
+    },
+    "ledyba": {
+      "regionalDexNumber": 8,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Routes 29–31",
+          "method": "grass",
+          "minLevel": 2,
+          "maxLevel": 6
+        }
+      ]
+    },
+    "spinarak": {
+      "regionalDexNumber": 9,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Routes 29–31",
+          "method": "grass",
+          "minLevel": 2,
+          "maxLevel": 6
+        }
+      ]
+    },
+    "bellsprout": {
+      "regionalDexNumber": 10,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Routes 29–31",
+          "method": "grass",
+          "minLevel": 2,
+          "maxLevel": 6
+        }
+      ]
+    },
+    "caterpie": {
+      "regionalDexNumber": 11,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Routes 29–31",
+          "method": "grass",
+          "minLevel": 2,
+          "maxLevel": 6
+        }
+      ]
+    },
+    "weedle": {
+      "regionalDexNumber": 12,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Routes 29–31",
+          "method": "grass",
+          "minLevel": 2,
+          "maxLevel": 6
+        }
+      ]
+    },
+    "poliwag": {
+      "regionalDexNumber": 13,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Routes 29–31",
+          "method": "grass",
+          "minLevel": 2,
+          "maxLevel": 6
+        }
+      ]
+    },
+    "geodude": {
+      "regionalDexNumber": 14,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Dark Cave / Sprout Tower",
+          "method": "cave",
+          "minLevel": 3,
+          "maxLevel": 6
+        }
+      ]
+    },
+    "zubat": {
+      "regionalDexNumber": 15,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Dark Cave / Sprout Tower",
+          "method": "cave",
+          "minLevel": 3,
+          "maxLevel": 6
+        }
+      ]
+    },
+    "gastly": {
+      "regionalDexNumber": 16,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Dark Cave / Sprout Tower",
+          "method": "cave",
+          "minLevel": 3,
+          "maxLevel": 6
+        }
+      ]
+    },
+    "dunsparce": {
+      "regionalDexNumber": 17,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Dark Cave / Sprout Tower",
+          "method": "cave",
+          "minLevel": 3,
+          "maxLevel": 6
+        }
+      ]
+    },
+    "mareep": {
+      "regionalDexNumber": 18,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-2-bugsy",
+      "locations": [
+        {
+          "areaName": "Route 32",
+          "method": "grass",
+          "minLevel": 4,
+          "maxLevel": 7
+        }
+      ]
+    },
+    "wooper": {
+      "regionalDexNumber": 19,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-2-bugsy",
+      "locations": [
+        {
+          "areaName": "Route 32",
+          "method": "grass",
+          "minLevel": 4,
+          "maxLevel": 7
+        }
+      ]
+    },
+    "ekans": {
+      "regionalDexNumber": 20,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-2-bugsy",
+      "locations": [
+        {
+          "areaName": "Route 32",
+          "method": "grass",
+          "minLevel": 4,
+          "maxLevel": 7
+        }
+      ]
+    },
+    "hoppip": {
+      "regionalDexNumber": 21,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-2-bugsy",
+      "locations": [
+        {
+          "areaName": "Route 32",
+          "method": "grass",
+          "minLevel": 4,
+          "maxLevel": 7
+        }
+      ]
+    },
+    "onix": {
+      "regionalDexNumber": 22,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-2-bugsy",
+      "locations": [
+        {
+          "areaName": "Union Cave / Slowpoke Well",
+          "method": "cave",
+          "minLevel": 6,
+          "maxLevel": 9
+        }
+      ]
+    },
+    "sandshrew": {
+      "regionalDexNumber": 23,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-2-bugsy",
+      "locations": [
+        {
+          "areaName": "Union Cave / Slowpoke Well",
+          "method": "cave",
+          "minLevel": 6,
+          "maxLevel": 9
+        }
+      ]
+    },
+    "slowpoke": {
+      "regionalDexNumber": 24,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-2-bugsy",
+      "locations": [
+        {
+          "areaName": "Union Cave / Slowpoke Well",
+          "method": "cave",
+          "minLevel": 6,
+          "maxLevel": 9
+        }
+      ]
+    },
+    "heracross": {
+      "regionalDexNumber": 25,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-2-bugsy",
+      "locations": [
+        {
+          "areaName": "Azalea Town / Route 33 (Headbutt Trees)",
+          "method": "headbutt",
+          "minLevel": 10,
+          "maxLevel": 11
+        }
+      ]
+    },
+    "aipom": {
+      "regionalDexNumber": 26,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-2-bugsy",
+      "locations": [
+        {
+          "areaName": "Azalea Town / Route 33 (Headbutt Trees)",
+          "method": "headbutt",
+          "minLevel": 10,
+          "maxLevel": 11
+        }
+      ]
+    },
+    "pineco": {
+      "regionalDexNumber": 27,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-2-bugsy",
+      "locations": [
+        {
+          "areaName": "Azalea Town / Route 33 (Headbutt Trees)",
+          "method": "headbutt",
+          "minLevel": 10,
+          "maxLevel": 11
+        }
+      ]
+    },
+    "exeggcute": {
+      "regionalDexNumber": 28,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-2-bugsy",
+      "locations": [
+        {
+          "areaName": "Azalea Town / Route 33 (Headbutt Trees)",
+          "method": "headbutt",
+          "minLevel": 10,
+          "maxLevel": 11
+        }
+      ]
+    },
+    "abra": {
+      "regionalDexNumber": 29,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-3-whitney",
+      "locations": [
+        {
+          "areaName": "Route 34 / Route 35",
+          "method": "grass",
+          "minLevel": 10,
+          "maxLevel": 14
+        }
+      ]
+    },
+    "drowzee": {
+      "regionalDexNumber": 30,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-3-whitney",
+      "locations": [
+        {
+          "areaName": "Route 34 / Route 35",
+          "method": "grass",
+          "minLevel": 10,
+          "maxLevel": 14
+        }
+      ]
+    },
+    "ditto": {
+      "regionalDexNumber": 31,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-3-whitney",
+      "locations": [
+        {
+          "areaName": "Route 34 / Route 35",
+          "method": "grass",
+          "minLevel": 10,
+          "maxLevel": 14
+        }
+      ]
+    },
+    "snubbull": {
+      "regionalDexNumber": 32,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-3-whitney",
+      "locations": [
+        {
+          "areaName": "Route 34 / Route 35",
+          "method": "grass",
+          "minLevel": 10,
+          "maxLevel": 14
+        }
+      ]
+    },
+    "jigglypuff": {
+      "regionalDexNumber": 33,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-3-whitney",
+      "locations": [
+        {
+          "areaName": "Route 34 / Route 35",
+          "method": "grass",
+          "minLevel": 10,
+          "maxLevel": 14
+        }
+      ]
+    },
+    "scyther": {
+      "regionalDexNumber": 34,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-3-whitney",
+      "locations": [
+        {
+          "areaName": "National Park (Bug-Catching Contest)",
+          "method": "grass",
+          "minLevel": 12,
+          "maxLevel": 16
+        }
+      ]
+    },
+    "pinsir": {
+      "regionalDexNumber": 35,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-3-whitney",
+      "locations": [
+        {
+          "areaName": "National Park (Bug-Catching Contest)",
+          "method": "grass",
+          "minLevel": 12,
+          "maxLevel": 16
+        }
+      ]
+    },
+    "venonat": {
+      "regionalDexNumber": 36,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-3-whitney",
+      "locations": [
+        {
+          "areaName": "National Park (Bug-Catching Contest)",
+          "method": "grass",
+          "minLevel": 12,
+          "maxLevel": 16
+        }
+      ]
+    },
+    "butterfree": {
+      "regionalDexNumber": 37,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-3-whitney",
+      "locations": [
+        {
+          "areaName": "National Park (Bug-Catching Contest)",
+          "method": "grass",
+          "minLevel": 12,
+          "maxLevel": 16
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 10
+      }
+    },
+    "beedrill": {
+      "regionalDexNumber": 38,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-3-whitney",
+      "locations": [
+        {
+          "areaName": "National Park (Bug-Catching Contest)",
+          "method": "grass",
+          "minLevel": 12,
+          "maxLevel": 16
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 10
+      }
+    },
+    "eevee": {
+      "regionalDexNumber": 39,
+      "availability": "gift",
+      "earliestCheckpointId": "gym-3-whitney",
+      "locations": [
+        {
+          "areaName": "Goldenrod City (Bill’s House Gift)",
+          "method": "gift",
+          "minLevel": 20,
+          "maxLevel": 20
+        }
+      ]
+    },
+    "growlithe": {
+      "regionalDexNumber": 40,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-4-morty",
+      "locations": [
+        {
+          "areaName": "Routes 36–37",
+          "method": "grass",
+          "minLevel": 13,
+          "maxLevel": 20
+        }
+      ]
+    },
+    "vulpix": {
+      "regionalDexNumber": 41,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-4-morty",
+      "locations": [
+        {
+          "areaName": "Routes 36–37",
+          "method": "grass",
+          "minLevel": 13,
+          "maxLevel": 20
+        }
+      ]
+    },
+    "stantler": {
+      "regionalDexNumber": 42,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-4-morty",
+      "locations": [
+        {
+          "areaName": "Routes 36–37",
+          "method": "grass",
+          "minLevel": 13,
+          "maxLevel": 20
+        }
+      ]
+    },
+    "nidoranm": {
+      "regionalDexNumber": 43,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-4-morty",
+      "locations": [
+        {
+          "areaName": "Routes 36–37",
+          "method": "grass",
+          "minLevel": 13,
+          "maxLevel": 20
+        }
+      ]
+    },
+    "nidoranf": {
+      "regionalDexNumber": 44,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-4-morty",
+      "locations": [
+        {
+          "areaName": "Routes 36–37",
+          "method": "grass",
+          "minLevel": 13,
+          "maxLevel": 20
+        }
+      ]
+    },
+    "sudowoodo": {
+      "regionalDexNumber": 45,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-4-morty",
+      "locations": [
+        {
+          "areaName": "Routes 36–37",
+          "method": "grass",
+          "minLevel": 13,
+          "maxLevel": 20
+        }
+      ]
+    },
+    "koffing": {
+      "regionalDexNumber": 46,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-4-morty",
+      "locations": [
+        {
+          "areaName": "Burned Tower",
+          "method": "cave",
+          "minLevel": 14,
+          "maxLevel": 16
+        }
+      ]
+    },
+    "magmar": {
+      "regionalDexNumber": 47,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-4-morty",
+      "locations": [
+        {
+          "areaName": "Burned Tower",
+          "method": "cave",
+          "minLevel": 14,
+          "maxLevel": 16
+        }
+      ]
+    },
+    "magnemite": {
+      "regionalDexNumber": 48,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-4-morty",
+      "locations": [
+        {
+          "areaName": "Routes 38–39",
+          "method": "grass",
+          "minLevel": 15,
+          "maxLevel": 17
+        }
+      ]
+    },
+    "tauros": {
+      "regionalDexNumber": 49,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-4-morty",
+      "locations": [
+        {
+          "areaName": "Routes 38–39",
+          "method": "grass",
+          "minLevel": 15,
+          "maxLevel": 17
+        }
+      ]
+    },
+    "miltank": {
+      "regionalDexNumber": 50,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-4-morty",
+      "locations": [
+        {
+          "areaName": "Routes 38–39",
+          "method": "grass",
+          "minLevel": 15,
+          "maxLevel": 17
+        }
+      ]
+    },
+    "farfetchd": {
+      "regionalDexNumber": 51,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-4-morty",
+      "locations": [
+        {
+          "areaName": "Routes 38–39",
+          "method": "grass",
+          "minLevel": 15,
+          "maxLevel": 17
+        }
+      ]
+    },
+    "meowth": {
+      "regionalDexNumber": 52,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-4-morty",
+      "locations": [
+        {
+          "areaName": "Routes 38–39",
+          "method": "grass",
+          "minLevel": 15,
+          "maxLevel": 17
+        }
+      ]
+    },
+    "tentacool": {
+      "regionalDexNumber": 53,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-5-chuck",
+      "locations": [
+        {
+          "areaName": "Routes 40–41 / Cianwood",
+          "method": "surf",
+          "minLevel": 15,
+          "maxLevel": 24
+        }
+      ]
+    },
+    "krabby": {
+      "regionalDexNumber": 54,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-5-chuck",
+      "locations": [
+        {
+          "areaName": "Routes 40–41 / Cianwood",
+          "method": "surf",
+          "minLevel": 15,
+          "maxLevel": 24
+        }
+      ]
+    },
+    "staryu": {
+      "regionalDexNumber": 55,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-5-chuck",
+      "locations": [
+        {
+          "areaName": "Routes 40–41 / Cianwood",
+          "method": "surf",
+          "minLevel": 15,
+          "maxLevel": 24
+        }
+      ]
+    },
+    "chinchou": {
+      "regionalDexNumber": 56,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-5-chuck",
+      "locations": [
+        {
+          "areaName": "Routes 40–41 / Cianwood",
+          "method": "surf",
+          "minLevel": 15,
+          "maxLevel": 24
+        }
+      ]
+    },
+    "corsola": {
+      "regionalDexNumber": 57,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-5-chuck",
+      "locations": [
+        {
+          "areaName": "Routes 40–41 / Cianwood",
+          "method": "surf",
+          "minLevel": 15,
+          "maxLevel": 24
+        }
+      ]
+    },
+    "shuckle": {
+      "regionalDexNumber": 58,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-5-chuck",
+      "locations": [
+        {
+          "areaName": "Routes 40–41 / Cianwood",
+          "method": "surf",
+          "minLevel": 15,
+          "maxLevel": 24
+        }
+      ]
+    },
+    "mankey": {
+      "regionalDexNumber": 59,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-7-pryce",
+      "locations": [
+        {
+          "areaName": "Route 42 / Mt. Mortar / Route 43",
+          "method": "grass",
+          "minLevel": 15,
+          "maxLevel": 23
+        }
+      ]
+    },
+    "spearow": {
+      "regionalDexNumber": 60,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-7-pryce",
+      "locations": [
+        {
+          "areaName": "Route 42 / Mt. Mortar / Route 43",
+          "method": "grass",
+          "minLevel": 15,
+          "maxLevel": 23
+        }
+      ]
+    },
+    "machop": {
+      "regionalDexNumber": 61,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-7-pryce",
+      "locations": [
+        {
+          "areaName": "Route 42 / Mt. Mortar / Route 43",
+          "method": "grass",
+          "minLevel": 15,
+          "maxLevel": 23
+        }
+      ]
+    },
+    "marill": {
+      "regionalDexNumber": 62,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-7-pryce",
+      "locations": [
+        {
+          "areaName": "Route 42 / Mt. Mortar / Route 43",
+          "method": "grass",
+          "minLevel": 15,
+          "maxLevel": 23
+        }
+      ]
+    },
+    "girafarig": {
+      "regionalDexNumber": 63,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-7-pryce",
+      "locations": [
+        {
+          "areaName": "Route 42 / Mt. Mortar / Route 43",
+          "method": "grass",
+          "minLevel": 15,
+          "maxLevel": 23
+        }
+      ]
+    },
+    "gyarados": {
+      "regionalDexNumber": 64,
+      "availability": "static",
+      "earliestCheckpointId": "gym-7-pryce",
+      "locations": [
+        {
+          "areaName": "Lake of Rage (Red Gyarados)",
+          "method": "static",
+          "minLevel": 30,
+          "maxLevel": 30
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 20
+      }
+    },
+    "magikarp": {
+      "regionalDexNumber": 65,
+      "availability": "static",
+      "earliestCheckpointId": "gym-7-pryce",
+      "locations": [
+        {
+          "areaName": "Lake of Rage (Red Gyarados)",
+          "method": "static",
+          "minLevel": 30,
+          "maxLevel": 30
+        }
+      ]
+    },
+    "swinub": {
+      "regionalDexNumber": 66,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Ice Path",
+          "method": "cave",
+          "minLevel": 21,
+          "maxLevel": 25
+        }
+      ]
+    },
+    "sneasel": {
+      "regionalDexNumber": 67,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Ice Path",
+          "method": "cave",
+          "minLevel": 21,
+          "maxLevel": 25
+        }
+      ]
+    },
+    "delibird": {
+      "regionalDexNumber": 68,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Ice Path",
+          "method": "cave",
+          "minLevel": 21,
+          "maxLevel": 25
+        }
+      ]
+    },
+    "jynx": {
+      "regionalDexNumber": 69,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Ice Path",
+          "method": "cave",
+          "minLevel": 21,
+          "maxLevel": 25
+        }
+      ]
+    },
+    "seel": {
+      "regionalDexNumber": 70,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Ice Path",
+          "method": "cave",
+          "minLevel": 21,
+          "maxLevel": 25
+        }
+      ]
+    },
+    "gligar": {
+      "regionalDexNumber": 71,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Route 45",
+          "method": "grass",
+          "minLevel": 22,
+          "maxLevel": 27
+        }
+      ]
+    },
+    "skarmory": {
+      "regionalDexNumber": 72,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Route 45",
+          "method": "grass",
+          "minLevel": 22,
+          "maxLevel": 27
+        }
+      ]
+    },
+    "phanpy": {
+      "regionalDexNumber": 73,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Route 45",
+          "method": "grass",
+          "minLevel": 22,
+          "maxLevel": 27
+        }
+      ]
+    },
+    "teddiursa": {
+      "regionalDexNumber": 74,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Route 45",
+          "method": "grass",
+          "minLevel": 22,
+          "maxLevel": 27
+        }
+      ]
+    },
+    "graveler": {
+      "regionalDexNumber": 75,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Route 45",
+          "method": "grass",
+          "minLevel": 22,
+          "maxLevel": 27
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 25
+      }
+    },
+    "dratini": {
+      "regionalDexNumber": 76,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Dragon’s Den",
+          "method": "surf",
+          "minLevel": 10,
+          "maxLevel": 20
+        }
+      ]
+    },
+    "horsea": {
+      "regionalDexNumber": 77,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Dragon’s Den",
+          "method": "surf",
+          "minLevel": 10,
+          "maxLevel": 20
+        }
+      ]
+    },
+    "rhyhorn": {
+      "regionalDexNumber": 78,
+      "availability": "wild",
+      "earliestCheckpointId": "champion-lance",
+      "locations": [
+        {
+          "areaName": "Victory Road / Route 27",
+          "method": "cave",
+          "minLevel": 30,
+          "maxLevel": 36
+        }
+      ]
+    },
+    "ursaring": {
+      "regionalDexNumber": 79,
+      "availability": "wild",
+      "earliestCheckpointId": "champion-lance",
+      "locations": [
+        {
+          "areaName": "Victory Road / Route 27",
+          "method": "cave",
+          "minLevel": 30,
+          "maxLevel": 36
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 30
+      }
+    },
+    "donphan": {
+      "regionalDexNumber": 80,
+      "availability": "wild",
+      "earliestCheckpointId": "champion-lance",
+      "locations": [
+        {
+          "areaName": "Victory Road / Route 27",
+          "method": "cave",
+          "minLevel": 30,
+          "maxLevel": 36
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 25
+      }
+    },
+    "ponyta": {
+      "regionalDexNumber": 81,
+      "availability": "wild",
+      "earliestCheckpointId": "champion-lance",
+      "locations": [
+        {
+          "areaName": "Victory Road / Route 27",
+          "method": "cave",
+          "minLevel": 30,
+          "maxLevel": 36
+        }
+      ]
+    },
+    "doduo": {
+      "regionalDexNumber": 82,
+      "availability": "wild",
+      "earliestCheckpointId": "champion-lance",
+      "locations": [
+        {
+          "areaName": "Victory Road / Route 27",
+          "method": "cave",
+          "minLevel": 30,
+          "maxLevel": 36
+        }
+      ]
+    },
+    "larvitar": {
+      "regionalDexNumber": 83,
+      "availability": "post-game",
+      "earliestCheckpointId": "champion-lance",
+      "locations": [
+        {
+          "areaName": "Mt. Silver (Post-Game)",
+          "method": "cave",
+          "minLevel": 15,
+          "maxLevel": 20
+        }
+      ]
+    },
+    "togepi": {
+      "regionalDexNumber": 84,
+      "availability": "gift",
+      "earliestCheckpointId": "gym-2-bugsy",
+      "locations": [
+        {
+          "areaName": "Violet City (Elm’s Aide Egg)",
+          "method": "gift",
+          "minLevel": 1,
+          "maxLevel": 1
+        }
+      ]
+    },
+    "lugia": {
+      "regionalDexNumber": 85,
+      "availability": "static",
+      "earliestCheckpointId": "champion-lance",
+      "locations": [
+        {
+          "areaName": "Whirl Islands (SoulSilver Story)",
+          "method": "static",
+          "minLevel": 45,
+          "maxLevel": 45
+        }
+      ],
+      "exclusiveToVersions": ["soulsilver"]
+    },
+    "hooh": {
+      "regionalDexNumber": 86,
+      "availability": "static",
+      "earliestCheckpointId": "champion-lance",
+      "locations": [
+        {
+          "areaName": "Bell Tower (HeartGold Story)",
+          "method": "static",
+          "minLevel": 45,
+          "maxLevel": 45
+        }
+      ],
+      "exclusiveToVersions": ["heartgold"]
+    },
+    "mamoswine": {
+      "regionalDexNumber": 87,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Johto Cross-Gen Evolutions",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false
+      }
+    },
+    "yanmega": {
+      "regionalDexNumber": 88,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Johto Cross-Gen Evolutions",
+          "method": "evolve"
+        }
+      ]
+    },
+    "ambipom": {
+      "regionalDexNumber": 89,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Johto Cross-Gen Evolutions",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false
+      }
+    },
+    "tangrowth": {
+      "regionalDexNumber": 90,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Johto Cross-Gen Evolutions",
+          "method": "evolve"
+        }
+      ]
+    },
+    "lickilicky": {
+      "regionalDexNumber": 91,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Johto Cross-Gen Evolutions",
+          "method": "evolve"
+        }
+      ]
+    },
+    "honchkrow": {
+      "regionalDexNumber": 92,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Johto Cross-Gen Evolutions",
+          "method": "evolve"
+        }
+      ]
+    },
+    "mismagius": {
+      "regionalDexNumber": 93,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Johto Cross-Gen Evolutions",
+          "method": "evolve"
+        }
+      ]
+    },
+    "weavile": {
+      "regionalDexNumber": 94,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Johto Cross-Gen Evolutions",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "requiresItem": "Razor Claw",
+        "notes": "at night"
+      }
+    },
+    "gliscor": {
+      "regionalDexNumber": 95,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Johto Cross-Gen Evolutions",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "requiresItem": "Razor Fang",
+        "notes": "at night"
+      }
+    },
+    "togekiss": {
+      "regionalDexNumber": 96,
+      "availability": "wild",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Johto Cross-Gen Evolutions",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "requiresItem": "Shiny Stone"
+      }
+    },
+    "bayleef": {
+      "regionalDexNumber": 97,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Evolve Chikorita (Lv 16)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 16
+      }
+    },
+    "quilava": {
+      "regionalDexNumber": 98,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Evolve Cyndaquil (Lv 14)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 14
+      }
+    },
+    "croconaw": {
+      "regionalDexNumber": 99,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Evolve Totodile (Lv 18)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 18
+      }
+    },
+    "pidgeotto": {
+      "regionalDexNumber": 100,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Evolve Pidgey (Lv 18)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 18
+      }
+    },
+    "furret": {
+      "regionalDexNumber": 101,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Evolve Sentret (Lv 15)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 15
+      }
+    },
+    "noctowl": {
+      "regionalDexNumber": 102,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Evolve Hoothoot (Lv 20)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 20
+      }
+    },
+    "raticate": {
+      "regionalDexNumber": 103,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Evolve Rattata (Lv 20)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 20
+      }
+    },
+    "ledian": {
+      "regionalDexNumber": 104,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Evolve Ledyba (Lv 18)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 18
+      }
+    },
+    "ariados": {
+      "regionalDexNumber": 105,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Evolve Spinarak (Lv 22)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 22
+      }
+    },
+    "weepinbell": {
+      "regionalDexNumber": 106,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Evolve Bellsprout (Lv 21)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 21
+      }
+    },
+    "metapod": {
+      "regionalDexNumber": 107,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Evolve Caterpie (Lv 7)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 7
+      }
+    },
+    "kakuna": {
+      "regionalDexNumber": 108,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Evolve Weedle (Lv 7)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 7
+      }
+    },
+    "poliwhirl": {
+      "regionalDexNumber": 109,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Evolve Poliwag (Lv 25)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 25
+      }
+    },
+    "golbat": {
+      "regionalDexNumber": 110,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Evolve Zubat (Lv 22)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 22
+      }
+    },
+    "haunter": {
+      "regionalDexNumber": 111,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Evolve Gastly (Lv 25)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 25
+      }
+    },
+    "flaaffy": {
+      "regionalDexNumber": 112,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-2-bugsy",
+      "locations": [
+        {
+          "areaName": "Evolve Mareep (Lv 15)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 15
+      }
+    },
+    "quagsire": {
+      "regionalDexNumber": 113,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-2-bugsy",
+      "locations": [
+        {
+          "areaName": "Evolve Wooper (Lv 20)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 20
+      }
+    },
+    "arbok": {
+      "regionalDexNumber": 114,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-2-bugsy",
+      "locations": [
+        {
+          "areaName": "Evolve Ekans (Lv 22)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 22
+      }
+    },
+    "skiploom": {
+      "regionalDexNumber": 115,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-2-bugsy",
+      "locations": [
+        {
+          "areaName": "Evolve Hoppip (Lv 18)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 18
+      }
+    },
+    "steelix": {
+      "regionalDexNumber": 116,
+      "availability": "trade-only",
+      "earliestCheckpointId": "gym-2-bugsy",
+      "locations": [
+        {
+          "areaName": "Evolve Onix (Metal Coat)",
+          "method": "trade"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": true,
+        "requiresItem": "Metal Coat"
+      }
+    },
+    "sandslash": {
+      "regionalDexNumber": 117,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-2-bugsy",
+      "locations": [
+        {
+          "areaName": "Evolve Sandshrew (Lv 22)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 22
+      }
+    },
+    "slowbro": {
+      "regionalDexNumber": 118,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-2-bugsy",
+      "locations": [
+        {
+          "areaName": "Evolve Slowpoke (Lv 37)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 37
+      }
+    },
+    "slowking": {
+      "regionalDexNumber": 119,
+      "availability": "trade-only",
+      "earliestCheckpointId": "gym-2-bugsy",
+      "locations": [
+        {
+          "areaName": "Evolve Slowpoke (King's Rock)",
+          "method": "trade"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": true,
+        "requiresItem": "King's Rock"
+      }
+    },
+    "forretress": {
+      "regionalDexNumber": 120,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-2-bugsy",
+      "locations": [
+        {
+          "areaName": "Evolve Pineco (Lv 31)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 31
+      }
+    },
+    "exeggutor": {
+      "regionalDexNumber": 121,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-2-bugsy",
+      "locations": [
+        {
+          "areaName": "Evolve Exeggcute (Leaf Stone)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "requiresItem": "Leaf Stone"
+      }
+    },
+    "kadabra": {
+      "regionalDexNumber": 122,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-3-whitney",
+      "locations": [
+        {
+          "areaName": "Evolve Abra (Lv 16)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 16
+      }
+    },
+    "hypno": {
+      "regionalDexNumber": 123,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-3-whitney",
+      "locations": [
+        {
+          "areaName": "Evolve Drowzee (Lv 26)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 26
+      }
+    },
+    "granbull": {
+      "regionalDexNumber": 124,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-3-whitney",
+      "locations": [
+        {
+          "areaName": "Evolve Snubbull (Lv 23)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 23
+      }
+    },
+    "wigglytuff": {
+      "regionalDexNumber": 125,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-3-whitney",
+      "locations": [
+        {
+          "areaName": "Evolve Jigglypuff (Moon Stone)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "requiresItem": "Moon Stone"
+      }
+    },
+    "scizor": {
+      "regionalDexNumber": 126,
+      "availability": "trade-only",
+      "earliestCheckpointId": "gym-3-whitney",
+      "locations": [
+        {
+          "areaName": "Evolve Scyther (Metal Coat)",
+          "method": "trade"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": true,
+        "requiresItem": "Metal Coat"
+      }
+    },
+    "venomoth": {
+      "regionalDexNumber": 127,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-3-whitney",
+      "locations": [
+        {
+          "areaName": "Evolve Venonat (Lv 31)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 31
+      }
+    },
+    "vaporeon": {
+      "regionalDexNumber": 128,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-3-whitney",
+      "locations": [
+        {
+          "areaName": "Evolve Eevee (Water Stone)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "requiresItem": "Water Stone"
+      }
+    },
+    "jolteon": {
+      "regionalDexNumber": 129,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-3-whitney",
+      "locations": [
+        {
+          "areaName": "Evolve Eevee (Thunder Stone)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "requiresItem": "Thunder Stone"
+      }
+    },
+    "flareon": {
+      "regionalDexNumber": 130,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-3-whitney",
+      "locations": [
+        {
+          "areaName": "Evolve Eevee (Fire Stone)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "requiresItem": "Fire Stone"
+      }
+    },
+    "espeon": {
+      "regionalDexNumber": 131,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-3-whitney",
+      "locations": [
+        {
+          "areaName": "Evolve Eevee",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "notes": "during the day"
+      }
+    },
+    "umbreon": {
+      "regionalDexNumber": 132,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-3-whitney",
+      "locations": [
+        {
+          "areaName": "Evolve Eevee",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "notes": "at night"
+      }
+    },
+    "leafeon": {
+      "regionalDexNumber": 133,
+      "availability": "post-game",
+      "earliestCheckpointId": "champion-lance",
+      "locations": [
+        {
+          "areaName": "Evolve Eevee (Leaf Stone)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "requiresItem": "Leaf Stone",
+        "notes": "near a Moss Rock"
+      }
+    },
+    "glaceon": {
+      "regionalDexNumber": 134,
+      "availability": "post-game",
+      "earliestCheckpointId": "champion-lance",
+      "locations": [
+        {
+          "areaName": "Evolve Eevee (Ice Stone)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "requiresItem": "Ice Stone",
+        "notes": "near an Ice Rock"
+      }
+    },
+    "arcanine": {
+      "regionalDexNumber": 135,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-4-morty",
+      "locations": [
+        {
+          "areaName": "Evolve Growlithe (Fire Stone)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "requiresItem": "Fire Stone"
+      }
+    },
+    "ninetales": {
+      "regionalDexNumber": 136,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-4-morty",
+      "locations": [
+        {
+          "areaName": "Evolve Vulpix (Fire Stone)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "requiresItem": "Fire Stone"
+      }
+    },
+    "nidorino": {
+      "regionalDexNumber": 137,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-4-morty",
+      "locations": [
+        {
+          "areaName": "Evolve Nidoran-M (Lv 16)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 16
+      }
+    },
+    "nidorina": {
+      "regionalDexNumber": 138,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-4-morty",
+      "locations": [
+        {
+          "areaName": "Evolve Nidoran-F (Lv 16)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 16
+      }
+    },
+    "weezing": {
+      "regionalDexNumber": 139,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-4-morty",
+      "locations": [
+        {
+          "areaName": "Evolve Koffing (Lv 35)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 35
+      }
+    },
+    "magmortar": {
+      "regionalDexNumber": 140,
+      "availability": "trade-only",
+      "earliestCheckpointId": "gym-4-morty",
+      "locations": [
+        {
+          "areaName": "Evolve Magmar (Magmarizer)",
+          "method": "trade"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": true,
+        "requiresItem": "Magmarizer"
+      }
+    },
+    "magneton": {
+      "regionalDexNumber": 141,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-4-morty",
+      "locations": [
+        {
+          "areaName": "Evolve Magnemite (Lv 30)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 30
+      }
+    },
+    "persian": {
+      "regionalDexNumber": 142,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-4-morty",
+      "locations": [
+        {
+          "areaName": "Evolve Meowth (Lv 28)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 28
+      }
+    },
+    "tentacruel": {
+      "regionalDexNumber": 143,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-5-chuck",
+      "locations": [
+        {
+          "areaName": "Evolve Tentacool (Lv 30)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 30
+      }
+    },
+    "kingler": {
+      "regionalDexNumber": 144,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-5-chuck",
+      "locations": [
+        {
+          "areaName": "Evolve Krabby (Lv 28)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 28
+      }
+    },
+    "starmie": {
+      "regionalDexNumber": 145,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-5-chuck",
+      "locations": [
+        {
+          "areaName": "Evolve Staryu (Water Stone)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "requiresItem": "Water Stone"
+      }
+    },
+    "lanturn": {
+      "regionalDexNumber": 146,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-5-chuck",
+      "locations": [
+        {
+          "areaName": "Evolve Chinchou (Lv 27)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 27
+      }
+    },
+    "primeape": {
+      "regionalDexNumber": 147,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-7-pryce",
+      "locations": [
+        {
+          "areaName": "Evolve Mankey (Lv 28)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 28
+      }
+    },
+    "fearow": {
+      "regionalDexNumber": 148,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-7-pryce",
+      "locations": [
+        {
+          "areaName": "Evolve Spearow (Lv 20)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 20
+      }
+    },
+    "machoke": {
+      "regionalDexNumber": 149,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-7-pryce",
+      "locations": [
+        {
+          "areaName": "Evolve Machop (Lv 28)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 28
+      }
+    },
+    "azumarill": {
+      "regionalDexNumber": 150,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-7-pryce",
+      "locations": [
+        {
+          "areaName": "Evolve Marill (Lv 18)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 18
+      }
+    },
+    "piloswine": {
+      "regionalDexNumber": 151,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Evolve Swinub (Lv 33)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 33
+      }
+    },
+    "dewgong": {
+      "regionalDexNumber": 152,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Evolve Seel (Lv 34)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 34
+      }
+    },
+    "golem": {
+      "regionalDexNumber": 153,
+      "availability": "trade-only",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Evolve Graveler (Trade)",
+          "method": "trade"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": true
+      }
+    },
+    "dragonair": {
+      "regionalDexNumber": 154,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Evolve Dratini (Lv 30)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 30
+      }
+    },
+    "seadra": {
+      "regionalDexNumber": 155,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Evolve Horsea (Lv 32)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 32
+      }
+    },
+    "rhydon": {
+      "regionalDexNumber": 156,
+      "availability": "evolution",
+      "earliestCheckpointId": "champion-lance",
+      "locations": [
+        {
+          "areaName": "Evolve Rhyhorn (Lv 42)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 42
+      }
+    },
+    "rapidash": {
+      "regionalDexNumber": 157,
+      "availability": "evolution",
+      "earliestCheckpointId": "champion-lance",
+      "locations": [
+        {
+          "areaName": "Evolve Ponyta (Lv 40)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 40
+      }
+    },
+    "dodrio": {
+      "regionalDexNumber": 158,
+      "availability": "evolution",
+      "earliestCheckpointId": "champion-lance",
+      "locations": [
+        {
+          "areaName": "Evolve Doduo (Lv 31)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 31
+      }
+    },
+    "pupitar": {
+      "regionalDexNumber": 159,
+      "availability": "post-game",
+      "earliestCheckpointId": "champion-lance",
+      "locations": [
+        {
+          "areaName": "Evolve Larvitar (Lv 30)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 30
+      }
+    },
+    "togetic": {
+      "regionalDexNumber": 160,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-2-bugsy",
+      "locations": [
+        {
+          "areaName": "Evolve Togepi",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false
+      }
+    },
+    "meganium": {
+      "regionalDexNumber": 161,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Evolve Bayleef (Lv 32)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 32
+      }
+    },
+    "typhlosion": {
+      "regionalDexNumber": 162,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Evolve Quilava (Lv 36)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 36
+      }
+    },
+    "feraligatr": {
+      "regionalDexNumber": 163,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Evolve Croconaw (Lv 30)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 30
+      }
+    },
+    "pidgeot": {
+      "regionalDexNumber": 164,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Evolve Pidgeotto (Lv 36)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 36
+      }
+    },
+    "victreebel": {
+      "regionalDexNumber": 165,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Evolve Weepinbell (Leaf Stone)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "requiresItem": "Leaf Stone"
+      }
+    },
+    "poliwrath": {
+      "regionalDexNumber": 166,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Evolve Poliwhirl (Water Stone)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "requiresItem": "Water Stone"
+      }
+    },
+    "politoed": {
+      "regionalDexNumber": 167,
+      "availability": "trade-only",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Evolve Poliwhirl (King's Rock)",
+          "method": "trade"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": true,
+        "requiresItem": "King's Rock"
+      }
+    },
+    "crobat": {
+      "regionalDexNumber": 168,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Evolve Golbat",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false
+      }
+    },
+    "gengar": {
+      "regionalDexNumber": 169,
+      "availability": "trade-only",
+      "earliestCheckpointId": "gym-1-falkner",
+      "locations": [
+        {
+          "areaName": "Evolve Haunter (Trade)",
+          "method": "trade"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": true
+      }
+    },
+    "ampharos": {
+      "regionalDexNumber": 170,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-2-bugsy",
+      "locations": [
+        {
+          "areaName": "Evolve Flaaffy (Lv 30)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 30
+      }
+    },
+    "jumpluff": {
+      "regionalDexNumber": 171,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-2-bugsy",
+      "locations": [
+        {
+          "areaName": "Evolve Skiploom (Lv 27)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 27
+      }
+    },
+    "alakazam": {
+      "regionalDexNumber": 172,
+      "availability": "trade-only",
+      "earliestCheckpointId": "gym-3-whitney",
+      "locations": [
+        {
+          "areaName": "Evolve Kadabra (Trade)",
+          "method": "trade"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": true
+      }
+    },
+    "nidoking": {
+      "regionalDexNumber": 173,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-4-morty",
+      "locations": [
+        {
+          "areaName": "Evolve Nidorino (Moon Stone)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "requiresItem": "Moon Stone"
+      }
+    },
+    "nidoqueen": {
+      "regionalDexNumber": 174,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-4-morty",
+      "locations": [
+        {
+          "areaName": "Evolve Nidorina (Moon Stone)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "requiresItem": "Moon Stone"
+      }
+    },
+    "magnezone": {
+      "regionalDexNumber": 175,
+      "availability": "post-game",
+      "earliestCheckpointId": "champion-lance",
+      "locations": [
+        {
+          "areaName": "Evolve Magneton (Thunder Stone)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "requiresItem": "Thunder Stone",
+        "notes": "in a special magnetic field"
+      }
+    },
+    "machamp": {
+      "regionalDexNumber": 176,
+      "availability": "trade-only",
+      "earliestCheckpointId": "gym-7-pryce",
+      "locations": [
+        {
+          "areaName": "Evolve Machoke (Trade)",
+          "method": "trade"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": true
+      }
+    },
+    "dragonite": {
+      "regionalDexNumber": 177,
+      "availability": "evolution",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Evolve Dragonair (Lv 55)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 55
+      }
+    },
+    "kingdra": {
+      "regionalDexNumber": 178,
+      "availability": "trade-only",
+      "earliestCheckpointId": "gym-8-clair",
+      "locations": [
+        {
+          "areaName": "Evolve Seadra (Dragon Scale)",
+          "method": "trade"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": true,
+        "requiresItem": "Dragon Scale"
+      }
+    },
+    "rhyperior": {
+      "regionalDexNumber": 179,
+      "availability": "trade-only",
+      "earliestCheckpointId": "champion-lance",
+      "locations": [
+        {
+          "areaName": "Evolve Rhydon (Protector)",
+          "method": "trade"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": true,
+        "requiresItem": "Protector"
+      }
+    },
+    "tyranitar": {
+      "regionalDexNumber": 180,
+      "availability": "post-game",
+      "earliestCheckpointId": "champion-lance",
+      "locations": [
+        {
+          "areaName": "Evolve Pupitar (Lv 55)",
+          "method": "evolve"
+        }
+      ],
+      "evolutionNotes": {
+        "requiresTrade": false,
+        "minEvolutionLevel": 55
+      }
+    }
+  }
+}

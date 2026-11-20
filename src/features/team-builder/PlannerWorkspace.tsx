@@ -1,10 +1,12 @@
 import { useNavigate, useSearch } from '@tanstack/react-router';
-import { AlertTriangle, BarChart2, Sparkles, X } from 'lucide-react';
+import { AlertTriangle, BarChart2, Compass, Sparkles, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { pkmnDexGateway } from '@/data/dex/pkmnDexGateway';
 import { getThemePreference, setThemePreference, type ThemeMode } from '@/data/storage/teamStorage';
+import { getAvailableSpeciesInGame } from '@/domain/journey';
 import { decodeTeamFromSearchParams, encodeTeamToSearchParams } from '@/domain/sharing';
 import type { TeamSlotIndex } from '@/domain/types';
+import { JourneyPlannerPanel } from '@/features/journey-planner/JourneyPlannerPanel';
 import { SmartRecommendationsPanel } from '@/features/smart-recommendations/SmartRecommendationsPanel';
 import { TeamAnalysisSection } from '@/features/team-analysis/TeamAnalysisSection';
 import { SavedTeamsModal } from '@/features/team-sharing/SavedTeamsModal';
@@ -20,6 +22,9 @@ export function PlannerWorkspace() {
   const navigate = useNavigate();
 
   const context = useTeamStore((s) => s.context);
+  const activeManifest = useTeamStore((s) => s.activeManifest);
+  const excludeTradeEvolutions = useTeamStore((s) => s.excludeTradeEvolutions);
+  const onlyCatchableInGame = useTeamStore((s) => s.onlyCatchableInGame);
   const team = useTeamStore((s) => s.team);
   const teamName = useTeamStore((s) => s.teamName);
   const pickerSlotIndex = useTeamStore((s) => s.pickerSlotIndex);
@@ -30,7 +35,9 @@ export function PlannerWorkspace() {
   const loadSavedTeams = useTeamStore((s) => s.loadSavedTeams);
 
   const [theme, setTheme] = useState<ThemeMode>(() => getThemePreference());
-  const [workspaceTab, setWorkspaceTab] = useState<'analysis' | 'recommendations'>('analysis');
+  const [workspaceTab, setWorkspaceTab] = useState<'analysis' | 'recommendations' | 'journey'>(
+    'analysis',
+  );
   const [showdownOpen, setShowdownOpen] = useState(false);
   const [savedOpen, setSavedOpen] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
@@ -50,7 +57,7 @@ export function PlannerWorkspace() {
 
   // Initial URL hydration + IndexedDB load
   useEffect(() => {
-    loadSavedTeams();
+    void loadSavedTeams();
 
     if (hydratedRef.current) return;
     hydratedRef.current = true;
@@ -58,7 +65,7 @@ export function PlannerWorkspace() {
     if (search.p !== undefined || search.s !== undefined || search.g !== undefined) {
       const result = decodeTeamFromSearchParams(search, pkmnDexGateway);
       if (result.ok) {
-        hydrateFromSharedState(result.state);
+        void hydrateFromSharedState(result.state);
         if (result.warnings.length > 0) {
           setUrlBannerMessages([...result.warnings]);
         }
@@ -75,10 +82,14 @@ export function PlannerWorkspace() {
         version: 1,
         mode: context.mode,
         generation: context.generation,
+        ...(context.mode === 'campaign' ? { gameId: context.gameId } : {}),
+        ...(context.mode === 'campaign' && context.versionId
+          ? { versionId: context.versionId }
+          : {}),
         ...(teamName ? { teamName } : {}),
         team,
       }),
-    [context.mode, context.generation, teamName, team],
+    [context, teamName, team],
   );
 
   useEffect(() => {
@@ -127,6 +138,14 @@ export function PlannerWorkspace() {
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [editingSlotIndex, openEditor, openPicker, pickerSlotIndex, savedOpen, showdownOpen, team]);
+
+  const allowedRecommendationSlugs = useMemo(() => {
+    if (!activeManifest || !onlyCatchableInGame) return undefined;
+    return getAvailableSpeciesInGame(activeManifest, {
+      excludeTradeEvolutions,
+      ...(context.mode === 'campaign' && context.versionId ? { versionId: context.versionId } : {}),
+    });
+  }, [activeManifest, context, excludeTradeEvolutions, onlyCatchableInGame]);
 
   const shareUrl = useMemo(() => {
     const qs = new URLSearchParams();
@@ -212,9 +231,34 @@ export function PlannerWorkspace() {
             <Sparkles className="h-3.5 w-3.5" />
             <span>Smart Recommendations</span>
           </button>
+          <button
+            type="button"
+            onClick={() => setWorkspaceTab('journey')}
+            className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold transition ${
+              workspaceTab === 'journey'
+                ? 'bg-[var(--ink-primary)] text-[var(--surface-card)]'
+                : 'border border-[var(--border-subtle)] bg-[var(--surface-card)] text-[var(--ink-secondary)] hover:border-[var(--border-strong)]'
+            }`}
+          >
+            <Compass className="h-3.5 w-3.5" />
+            <span>Journey Planner</span>
+            {activeManifest && (
+              <span className="rounded bg-[var(--accent-primary)] px-1.5 py-0.25 text-[10px] font-bold text-[var(--accent-ink)]">
+                {activeManifest.shortName}
+              </span>
+            )}
+          </button>
         </div>
 
-        {workspaceTab === 'analysis' ? <TeamAnalysisSection /> : <SmartRecommendationsPanel />}
+        {workspaceTab === 'analysis' && <TeamAnalysisSection />}
+        {workspaceTab === 'recommendations' && (
+          <SmartRecommendationsPanel
+            {...(allowedRecommendationSlugs
+              ? { allowedSpeciesSlugs: allowedRecommendationSlugs }
+              : {})}
+          />
+        )}
+        {workspaceTab === 'journey' && <JourneyPlannerPanel />}
       </main>
 
       <PokemonPickerModal />

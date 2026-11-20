@@ -1,0 +1,202 @@
+[
+  {
+    "id": "red-blue-yellow",
+    "name": "Pokémon Red / Blue / Yellow",
+    "shortName": "RBY",
+    "generation": 1,
+    "region": "Kanto",
+    "versions": [
+      {
+        "id": "red",
+        "name": "Red"
+      },
+      {
+        "id": "blue",
+        "name": "Blue"
+      },
+      {
+        "id": "yellow",
+        "name": "Yellow"
+      }
+    ],
+    "mechanics": {
+      "hasAbilities": false,
+      "hasHeldItems": false,
+      "hasNatures": false,
+      "physicalSpecialSplit": false,
+      "gimmick": null
+    },
+    "manifestPath": "/data/games/red-blue-yellow.json"
+  },
+  {
+    "id": "gold-silver-crystal",
+    "name": "Pokémon Gold / Silver / Crystal",
+    "shortName": "GSC",
+    "generation": 2,
+    "region": "Johto",
+    "versions": [
+      {
+        "id": "gold",
+        "name": "Gold"
+      },
+      {
+        "id": "silver",
+        "name": "Silver"
+      },
+      {
+        "id": "crystal",
+        "name": "Crystal"
+      }
+    ],
+    "mechanics": {
+      "hasAbilities": false,
+      "hasHeldItems": true,
+      "hasNatures": false,
+      "physicalSpecialSplit": false,
+      "gimmick": null
+    },
+    "manifestPath": "/data/games/gold-silver-crystal.json"
+  },
+  {
+    "id": "emerald",
+    "name": "Pokémon Emerald",
+    "shortName": "Emerald",
+    "generation": 3,
+    "region": "Hoenn",
+    "versions": [
+      {
+        "id": "emerald",
+        "name": "Emerald"
+      }
+    ],
+    "mechanics": {
+      "hasAbilities": true,
+      "hasHeldItems": true,
+      "hasNatures": true,
+      "physicalSpecialSplit": false,
+      "gimmick": null
+    },
+    "manifestPath": "/data/games/emerald.json"
+  },
+  {
+    "id": "firered-leafgreen",
+    "name": "Pokémon FireRed / LeafGreen",
+    "shortName": "FRLG",
+    "generation": 3,
+    "region": "Kanto",
+    "versions": [
+      {
+        "id": "firered",
+        "name": "FireRed"
+      },
+      {
+        "id": "leafgreen",
+        "name": "LeafGreen"
+      }
+    ],
+    "mechanics": {
+      "hasAbilities": true,
+      "hasHeldItems": true,
+      "hasNatures": true,
+      "physicalSpecialSplit": false,
+      "gimmick": null
+    },
+    "manifestPath": "/data/games/firered-leafgreen.json"
+  },
+  {
+    "id": "platinum",
+    "name": "Pokémon Platinum",
+    "shortName": "Platinum",
+    "generation": 4,
+    "region": "Sinnoh",
+    "versions": [
+      {
+        "id": "platinum",
+        "name": "Platinum"
+      }
+    ],
+    "mechanics": {
+      "hasAbilities": true,
+      "hasHeldItems": true,
+      "hasNatures": true,
+      "physicalSpecialSplit": true,
+      "gimmick": null
+    },
+    "manifestPath": "/data/games/platinum.json"
+  },
+  {
+    "id": "heartgold-soulsilver",
+    "name": "Pokémon HeartGold / SoulSilver",
+    "shortName": "HGSS",
+    "generation": 4,
+    "region": "Johto",
+    "versions": [
+      {
+        "id": "heartgold",
+        "name": "HeartGold"
+      },
+      {
+        "id": "soulsilver",
+        "name": "SoulSilver"
+      }
+    ],
+    "mechanics": {
+      "hasAbilities": true,
+      "hasHeldItems": true,
+      "hasNatures": true,
+      "physicalSpecialSplit": true,
+      "gimmick": null
+    },
+    "manifestPath": "/data/games/heartgold-soulsilver.json"
+  },
+  {
+    "id": "black-white",
+    "name": "Pokémon Black / White",
+    "shortName": "BW",
+    "generation": 5,
+    "region": "Unova",
+    "versions": [
+      {
+        "id": "black",
+        "name": "Black"
+      },
+      {
+        "id": "white",
+        "name": "White"
+      }
+    ],
+    "mechanics": {
+      "hasAbilities": true,
+      "hasHeldItems": true,
+      "hasNatures": true,
+      "physicalSpecialSplit": true,
+      "gimmick": null
+    },
+    "manifestPath": "/data/games/black-white.json"
+  },
+  {
+    "id": "black-2-white-2",
+    "name": "Pokémon Black 2 / White 2",
+    "shortName": "B2W2",
+    "generation": 5,
+    "region": "Unova",
+    "versions": [
+      {
+        "id": "black-2",
+        "name": "Black 2"
+      },
+      {
+        "id": "white-2",
+        "name": "White 2"
+      }
+    ],
+    "mechanics": {
+      "hasAbilities": true,
+      "hasHeldItems": true,
+      "hasNatures": true,
+      "physicalSpecialSplit": true,
+      "gimmick": null
+    },
+    "manifestPath": "/data/games/black-2-white-2.json"
+  }
+]

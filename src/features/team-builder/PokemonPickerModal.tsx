@@ -5,6 +5,7 @@ import { PokemonSprite } from '@/components/pokemon/PokemonSprite';
 import { TypeBadge } from '@/components/pokemon/TypeBadge';
 import { TYPE_COLOR_VARS, TypeIcon } from '@/components/pokemon/TypeIcon';
 import { pkmnDexGateway } from '@/data/dex/pkmnDexGateway';
+import { getAvailableSpeciesAtCheckpoint, getAvailableSpeciesInGame } from '@/domain/journey';
 import { getAvailableTypes } from '@/domain/mechanics';
 import { recommendPokemonForTeam } from '@/domain/recommendations';
 import type { PokemonType, SpeciesData } from '@/domain/types';
@@ -19,7 +20,11 @@ function computeBst(species: SpeciesData): number {
 
 export function PokemonPickerModal() {
   const pickerSlotIndex = useTeamStore((s) => s.pickerSlotIndex);
+  const pickerTarget = useTeamStore((s) => s.pickerTarget);
   const context = useTeamStore((s) => s.context);
+  const activeManifest = useTeamStore((s) => s.activeManifest);
+  const excludeTradeEvolutions = useTeamStore((s) => s.excludeTradeEvolutions);
+  const onlyCatchableInGame = useTeamStore((s) => s.onlyCatchableInGame);
   const team = useTeamStore((s) => s.team);
   const closePicker = useTeamStore((s) => s.closePicker);
   const setSlotSpecies = useTeamStore((s) => s.setSlotSpecies);
@@ -48,10 +53,29 @@ export function PokemonPickerModal() {
     [context.generation],
   );
 
-  const allSpecies = useMemo(
-    () => pkmnDexGateway.listSpecies(context.generation),
-    [context.generation],
-  );
+  const allowedCampaignSlugs = useMemo(() => {
+    if (!activeManifest || !onlyCatchableInGame) return null;
+    const opts = {
+      excludeTradeEvolutions,
+      ...(context.mode === 'campaign' && context.versionId ? { versionId: context.versionId } : {}),
+    };
+    if (pickerTarget?.checkpointId) {
+      return getAvailableSpeciesAtCheckpoint(activeManifest, pickerTarget.checkpointId, opts);
+    }
+    return getAvailableSpeciesInGame(activeManifest, opts);
+  }, [
+    activeManifest,
+    context,
+    excludeTradeEvolutions,
+    onlyCatchableInGame,
+    pickerTarget?.checkpointId,
+  ]);
+
+  const allSpecies = useMemo(() => {
+    const raw = pkmnDexGateway.listSpecies(context.generation);
+    if (!allowedCampaignSlugs) return raw;
+    return raw.filter((sp) => allowedCampaignSlugs.has(sp.slug));
+  }, [allowedCampaignSlugs, context.generation]);
 
   const recommendedMap = useMemo(() => {
     if (!isOpen || !onlyRecommended) return null;
@@ -59,9 +83,10 @@ export function PokemonPickerModal() {
       limit: 36,
       excludeLegendaries: true,
       ...(pickerSlotIndex !== null ? { replaceSlotIndex: pickerSlotIndex } : {}),
+      ...(allowedCampaignSlugs ? { allowedSpeciesSlugs: allowedCampaignSlugs } : {}),
     });
     return new Map(recs.map((r) => [r.species.slug, r]));
-  }, [context, isOpen, onlyRecommended, pickerSlotIndex, team]);
+  }, [allowedCampaignSlugs, context, isOpen, onlyRecommended, pickerSlotIndex, team]);
 
   const filteredSpecies = useMemo(() => {
     const trimmed = query.trim().toLowerCase();
@@ -110,6 +135,11 @@ export function PokemonPickerModal() {
     }
   };
 
+  const checkpointLabel = useMemo(() => {
+    if (!activeManifest || !pickerTarget?.checkpointId) return null;
+    return activeManifest.checkpoints.find((c) => c.id === pickerTarget.checkpointId)?.name ?? null;
+  }, [activeManifest, pickerTarget?.checkpointId]);
+
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && closePicker()}>
       <Dialog.Portal>
@@ -128,7 +158,9 @@ export function PokemonPickerModal() {
                 Select Pokémon — Slot {pickerSlotIndex !== null ? pickerSlotIndex + 1 : ''}
               </Dialog.Title>
               <Dialog.Description className="text-xs text-[var(--ink-muted)]">
-                Generation {context.generation} · {filteredSpecies.length} matching species
+                {activeManifest ? `${activeManifest.name}` : `Generation ${context.generation}`}
+                {checkpointLabel ? ` · ${checkpointLabel}` : ''} · {filteredSpecies.length} matching
+                species
               </Dialog.Description>
             </div>
             <Dialog.Close
@@ -142,7 +174,7 @@ export function PokemonPickerModal() {
           {/* Search & Type Filter Bar */}
           <div className="space-y-3 border-b border-[var(--border-subtle)] bg-[var(--surface-elevated)] px-5 py-3.5">
             <div className="flex flex-wrap gap-2">
-              <div className="relative flex-1 min-w-[14rem]">
+              <div className="relative min-w-[14rem] flex-1">
                 <Search
                   className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[var(--ink-muted)]"
                   aria-hidden="true"
@@ -219,13 +251,16 @@ export function PokemonPickerModal() {
           <div className="flex-1 overflow-y-auto p-4">
             {visibleSpecies.length === 0 ? (
               <div className="py-12 text-center text-sm text-[var(--ink-muted)]">
-                No Pokémon found matching your search in Generation {context.generation}.
+                No Pokémon found matching your filters.
               </div>
             ) : (
               <>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                   {visibleSpecies.map((species, index) => {
                     const isActive = index === activeIndex;
+                    const dexEntry = activeManifest?.dex[species.slug];
+                    const firstLocation = dexEntry?.locations[0]?.areaName;
+
                     return (
                       <button
                         key={species.slug}
@@ -266,6 +301,11 @@ export function PokemonPickerModal() {
                               BST {computeBst(species)}
                             </span>
                           </div>
+                          {firstLocation && (
+                            <p className="mt-1 truncate text-[10px] text-[var(--ink-muted)]">
+                              {firstLocation}
+                            </p>
+                          )}
                         </div>
                       </button>
                     );

@@ -53,6 +53,7 @@ export const encounterLocationSchema = z.object({
     'fossil',
     'trade',
     'evolve',
+    'headbutt',
     'honey-tree',
     'swarm',
   ]),

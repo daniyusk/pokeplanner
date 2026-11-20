@@ -26,6 +26,7 @@ export type EncounterMethod =
   | 'fossil'
   | 'trade'
   | 'evolve'
+  | 'headbutt'
   | 'honey-tree'
   | 'swarm';
 

@@ -28,6 +28,9 @@ jobs:
       - name: Type Check
         run: pnpm typecheck
 
+      - name: Validate Campaign Manifests
+        run: pnpm data:validate
+
       - name: Unit & Domain Tests
         run: pnpm test:coverage
 
