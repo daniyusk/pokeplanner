@@ -5,6 +5,7 @@ import { pkmnDexGateway } from '@/data/dex/pkmnDexGateway';
 import { getThemePreference, setThemePreference, type ThemeMode } from '@/data/storage/teamStorage';
 import { decodeTeamFromSearchParams, encodeTeamToSearchParams } from '@/domain/sharing';
 import type { TeamSlotIndex } from '@/domain/types';
+import { TeamAnalysisSection } from '@/features/team-analysis/TeamAnalysisSection';
 import { SavedTeamsModal } from '@/features/team-sharing/SavedTeamsModal';
 import { ShareShowdownModal } from '@/features/team-sharing/ShareShowdownModal';
 import { useTeamStore } from '@/stores/useTeamStore';
@@ -182,6 +183,7 @@ export function PlannerWorkspace() {
         )}
 
         <TeamDock />
+        <TeamAnalysisSection />
       </main>
 
       <PokemonPickerModal />
