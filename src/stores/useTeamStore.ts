@@ -7,41 +7,50 @@ import {
   type SavedTeamRecord,
   saveTeamRecord,
 } from '@/data/storage/teamStorage';
-import { buildDefaultJourneyFromFinalTeam } from '@/domain/journey';
-import { createEmptyTeam, type ShareableTeamState } from '@/domain/sharing';
+import type { ShareableTeamState } from '@/domain/sharing';
 import {
-  type CampaignGameContext,
+  createEmptyTeam,
+  findFirstEmptySlotIndex,
+  resolveGenderFormeTarget,
+  sanitizeTeamForContext,
+  swapTeamSlots,
+  withTeamSlot,
+} from '@/domain/team';
+import {
   createFreeModeContext,
   type GameContext,
   type GameManifest,
   type GenerationNumber,
   type Team,
   type TeamMember,
-  type TeamSlot,
   type TeamSlotIndex,
 } from '@/domain/types';
+import { generateEntityId } from './idGenerator';
+import {
+  buildCampaignContext,
+  buildCampaignLoadState,
+  buildFreeLoadState,
+  buildMemberFromSpecies,
+  getScopeKey,
+  resolveScopedSnapshot,
+  type ScopedTeamSnapshot,
+} from './teamTransitions';
+
+export type { ScopedTeamSnapshot };
 
 export type TeamMemberPatch = {
   [K in keyof TeamMember]?: TeamMember[K] | undefined;
 };
-
-export interface PickerTarget {
-  slotIndex: TeamSlotIndex;
-  checkpointId?: string;
-}
 
 export interface TeamStoreState {
   context: GameContext;
   activeManifest: GameManifest | null;
   excludeTradeEvolutions: boolean;
   onlyCatchableInGame: boolean;
-  activeCheckpointId: string | null;
-  journeySnapshots: Record<string, Team>;
 
+  teamsByScope: Record<string, ScopedTeamSnapshot>;
   teamName: string;
   team: Team;
-  pickerTarget: PickerTarget | null;
-  pickerSlotIndex: TeamSlotIndex | null;
   editingSlotIndex: TeamSlotIndex | null;
   savedTeams: SavedTeamRecord[];
   isStorageLoaded: boolean;
@@ -51,18 +60,17 @@ export interface TeamStoreState {
   setVersionId: (versionId: string) => void;
   setExcludeTradeEvolutions: (value: boolean) => void;
   setOnlyCatchableInGame: (value: boolean) => void;
-  setActiveCheckpoint: (checkpointId: string) => void;
-  syncJourneyFromFinalTeam: () => void;
-  clearJourneySlot: (checkpointId: string, slotIndex: TeamSlotIndex) => void;
 
   setTeamName: (name: string) => void;
+  selectFreeMode: () => void;
   setSlotSpecies: (slotIndex: TeamSlotIndex, speciesSlug: string) => void;
+  addSpeciesToTeam: (speciesSlug: string) => void;
+  toggleSlotGender: (slotIndex: TeamSlotIndex) => void;
+  toggleSlotShiny: (slotIndex: TeamSlotIndex) => void;
   updateSlotMember: (slotIndex: TeamSlotIndex, patch: TeamMemberPatch) => void;
   clearSlot: (slotIndex: TeamSlotIndex) => void;
   swapSlots: (fromIndex: TeamSlotIndex, toIndex: TeamSlotIndex) => void;
   resetTeam: () => void;
-  openPicker: (slotIndex: TeamSlotIndex, checkpointId?: string) => void;
-  closePicker: () => void;
   openEditor: (slotIndex: TeamSlotIndex) => void;
   closeEditor: () => void;
   hydrateFromSharedState: (shared: ShareableTeamState) => Promise<void>;
@@ -73,130 +81,60 @@ export interface TeamStoreState {
   deleteSavedTeam: (id: string) => Promise<void>;
 }
 
-function sanitizeSlotForContext(slot: TeamSlot, context: GameContext): TeamSlot {
-  if (!slot) return null;
-  const species = pkmnDexGateway.getSpecies(slot.speciesSlug, context.generation);
-  if (!species) return null;
-
-  const validMoves = slot.moveSlugs.filter((m) =>
-    Boolean(pkmnDexGateway.getMove(m, context.generation)),
-  );
-  const validAbility =
-    context.mechanics.hasAbilities && slot.abilitySlug
-      ? (pkmnDexGateway.getAbility(slot.abilitySlug, context.generation)?.slug ??
-        species.abilities[0])
-      : context.mechanics.hasAbilities
-        ? species.abilities[0]
-        : undefined;
-
-  const validItem =
-    context.mechanics.hasHeldItems && slot.itemSlug
-      ? pkmnDexGateway.getItem(slot.itemSlug, context.generation)?.slug
-      : undefined;
-
-  const validNature =
-    context.mechanics.hasNatures && slot.natureId
-      ? pkmnDexGateway.getNature(slot.natureId, context.generation)?.id
-      : undefined;
-
-  const validTera = context.mechanics.gimmick === 'terastal' ? slot.teraType : undefined;
-
-  return {
-    speciesSlug: species.slug,
-    moveSlugs: validMoves,
-    ...(validAbility ? { abilitySlug: validAbility } : {}),
-    ...(validItem ? { itemSlug: validItem } : {}),
-    ...(validNature ? { natureId: validNature } : {}),
-    ...(validTera ? { teraType: validTera } : {}),
-    ...(slot.level !== undefined ? { level: slot.level } : {}),
-    ...(slot.nickname ? { nickname: slot.nickname } : {}),
-  };
-}
-
-function sanitizeTeamForContext(team: Team, context: GameContext): Team {
-  return [
-    sanitizeSlotForContext(team[0], context),
-    sanitizeSlotForContext(team[1], context),
-    sanitizeSlotForContext(team[2], context),
-    sanitizeSlotForContext(team[3], context),
-    sanitizeSlotForContext(team[4], context),
-    sanitizeSlotForContext(team[5], context),
-  ];
-}
-
-function buildMemberFromSpecies(
-  speciesSlug: string,
-  context: GameContext,
-  existing: TeamSlot,
-): TeamMember | null {
-  const species = pkmnDexGateway.getSpecies(speciesSlug, context.generation);
-  if (!species) return null;
-
-  const isSameBaseSpecies = existing
-    ? pkmnDexGateway.getSpecies(existing.speciesSlug, context.generation)?.baseSpeciesSlug ===
-      species.baseSpeciesSlug
-    : false;
-
-  const defaultAbility = context.mechanics.hasAbilities ? species.abilities[0] : undefined;
-  return {
-    speciesSlug: species.slug,
-    moveSlugs: isSameBaseSpecies && existing ? existing.moveSlugs : [],
-    ...(defaultAbility ? { abilitySlug: defaultAbility } : {}),
-    ...(isSameBaseSpecies && existing?.itemSlug ? { itemSlug: existing.itemSlug } : {}),
-    ...(isSameBaseSpecies && existing?.natureId ? { natureId: existing.natureId } : {}),
-    ...(isSameBaseSpecies && existing?.teraType ? { teraType: existing.teraType } : {}),
-    ...(isSameBaseSpecies && existing?.nickname ? { nickname: existing.nickname } : {}),
-  };
-}
-
 export const useTeamStore = create<TeamStoreState>((set, get) => ({
   context: createFreeModeContext(9),
   activeManifest: null,
   excludeTradeEvolutions: true,
   onlyCatchableInGame: true,
-  activeCheckpointId: null,
-  journeySnapshots: {},
 
+  teamsByScope: {},
   teamName: '',
   team: createEmptyTeam(),
-  pickerTarget: null,
-  pickerSlotIndex: null,
   editingSlotIndex: null,
   savedTeams: [],
   isStorageLoaded: false,
 
   setGeneration(generation) {
-    const nextContext = createFreeModeContext(generation);
-    const nextTeam = sanitizeTeamForContext(get().team, nextContext);
+    const nextContext = createFreeModeContext(generation, generation === 9);
+    const nextTeam = sanitizeTeamForContext(get().team, nextContext, pkmnDexGateway);
     set({
       context: nextContext,
       activeManifest: null,
-      activeCheckpointId: null,
-      journeySnapshots: {},
       team: nextTeam,
     });
   },
 
-  selectCampaignGame(manifest, versionId) {
-    const resolvedVersionId = versionId ?? manifest.versions[0]?.id;
-    const nextContext: CampaignGameContext = {
-      mode: 'campaign',
-      gameId: manifest.id,
-      ...(resolvedVersionId ? { versionId: resolvedVersionId } : {}),
-      generation: manifest.generation,
-      mechanics: manifest.mechanics,
-    };
-
-    const nextTeam = sanitizeTeamForContext(get().team, nextContext);
-    const firstCheckpoint = manifest.checkpoints[0]?.id ?? null;
-    const journeySnapshots = buildDefaultJourneyFromFinalTeam(nextTeam, manifest, pkmnDexGateway);
+  selectFreeMode() {
+    const { context, team, teamName, teamsByScope } = get();
+    const nextContext = createFreeModeContext(9, true);
+    const { updatedScopes, restored } = resolveScopedSnapshot(
+      context,
+      team,
+      teamName,
+      teamsByScope,
+      nextContext,
+    );
 
     set({
-      context: nextContext,
-      activeManifest: manifest,
-      activeCheckpointId: firstCheckpoint,
-      journeySnapshots,
-      team: nextTeam,
+      ...buildFreeLoadState(9, restored.team, restored.teamName),
+      teamsByScope: updatedScopes,
+    });
+  },
+
+  selectCampaignGame(manifest, versionId) {
+    const { context, team, teamName, teamsByScope } = get();
+    const nextContext = buildCampaignContext(manifest, versionId);
+    const { updatedScopes, restored } = resolveScopedSnapshot(
+      context,
+      team,
+      teamName,
+      teamsByScope,
+      nextContext,
+    );
+
+    set({
+      ...buildCampaignLoadState(manifest, restored.team, restored.teamName, versionId),
+      teamsByScope: updatedScopes,
     });
   },
 
@@ -219,76 +157,71 @@ export const useTeamStore = create<TeamStoreState>((set, get) => ({
     set({ onlyCatchableInGame: value });
   },
 
-  setActiveCheckpoint(checkpointId) {
-    set({ activeCheckpointId: checkpointId });
-  },
-
-  syncJourneyFromFinalTeam() {
-    const { activeManifest, team } = get();
-    if (!activeManifest) return;
-    const journeySnapshots = buildDefaultJourneyFromFinalTeam(team, activeManifest, pkmnDexGateway);
-    set({ journeySnapshots });
-  },
-
-  clearJourneySlot(checkpointId, slotIndex) {
-    const { journeySnapshots } = get();
-    const currentSnapshot = journeySnapshots[checkpointId] ?? createEmptyTeam();
-    const nextSnapshot = [...currentSnapshot] as Team;
-    nextSnapshot[slotIndex] = null;
-    set({
-      journeySnapshots: {
-        ...journeySnapshots,
-        [checkpointId]: nextSnapshot,
-      },
-    });
-  },
-
   setTeamName(name) {
     set({ teamName: name });
   },
 
   setSlotSpecies(slotIndex, speciesSlug) {
-    const { context, team, pickerTarget, journeySnapshots, activeManifest } = get();
-
-    // If picker was opened for a specific Journey Checkpoint, update that snapshot!
-    if (pickerTarget?.checkpointId) {
-      const cpId = pickerTarget.checkpointId;
-      const currentSnapshot = journeySnapshots[cpId] ?? createEmptyTeam();
-      const nextMember = buildMemberFromSpecies(speciesSlug, context, currentSnapshot[slotIndex]);
-      if (!nextMember) return;
-      const nextSnapshot = [...currentSnapshot] as Team;
-      nextSnapshot[slotIndex] = nextMember;
-      set({
-        journeySnapshots: {
-          ...journeySnapshots,
-          [cpId]: nextSnapshot,
-        },
-        pickerTarget: null,
-        pickerSlotIndex: null,
-      });
-      return;
-    }
-
+    const { context, team } = get();
     const nextMember = buildMemberFromSpecies(speciesSlug, context, team[slotIndex]);
     if (!nextMember) return;
 
-    const nextTeam = [...team] as Team;
-    nextTeam[slotIndex] = nextMember;
+    set({ team: withTeamSlot(team, slotIndex, nextMember) });
+  },
 
-    const nextSnapshots = activeManifest
-      ? buildDefaultJourneyFromFinalTeam(nextTeam, activeManifest, pkmnDexGateway)
-      : journeySnapshots;
+  addSpeciesToTeam(speciesSlug) {
+    const emptyIndex = findFirstEmptySlotIndex(get().team);
+    if (emptyIndex !== -1) {
+      get().setSlotSpecies(emptyIndex, speciesSlug);
+    }
+  },
 
-    set({
-      team: nextTeam,
-      journeySnapshots: nextSnapshots,
-      pickerTarget: null,
-      pickerSlotIndex: null,
-    });
+  toggleSlotGender(slotIndex) {
+    const { context, team } = get();
+    const current = team[slotIndex];
+    if (!current) return;
+    const species = pkmnDexGateway.getSpecies(current.speciesSlug, context.generation);
+    if (!species) return;
+
+    if (species.availableGenders.length === 1) {
+      const altForme = resolveGenderFormeTarget(species, context.generation, pkmnDexGateway);
+      if (altForme) {
+        const nextGender = altForme.availableGenders[0];
+        set({
+          team: withTeamSlot(team, slotIndex, {
+            ...current,
+            speciesSlug: altForme.slug,
+            ...(nextGender ? { gender: nextGender } : {}),
+          }),
+        });
+        return;
+      }
+
+      const fixedGender = species.availableGenders[0];
+      if (fixedGender && current.gender !== fixedGender) {
+        get().updateSlotMember(slotIndex, { gender: fixedGender });
+      }
+      return;
+    }
+
+    const currentGender = current.gender ?? species.availableGenders[0] ?? 'M';
+    const currentIdx = species.availableGenders.indexOf(currentGender);
+    const nextGender =
+      species.availableGenders[(currentIdx + 1) % species.availableGenders.length] ??
+      species.availableGenders[0];
+    if (nextGender) {
+      get().updateSlotMember(slotIndex, { gender: nextGender });
+    }
+  },
+
+  toggleSlotShiny(slotIndex) {
+    const current = get().team[slotIndex];
+    if (!current) return;
+    get().updateSlotMember(slotIndex, { shiny: current.shiny ? undefined : true });
   },
 
   updateSlotMember(slotIndex, patch) {
-    const team = [...get().team] as Team;
+    const team = get().team;
     const current = team[slotIndex];
     if (!current) return;
 
@@ -298,6 +231,8 @@ export const useTeamStore = create<TeamStoreState>((set, get) => ({
     const teraType = 'teraType' in patch ? patch.teraType : current.teraType;
     const level = 'level' in patch ? patch.level : current.level;
     const nickname = 'nickname' in patch ? patch.nickname : current.nickname;
+    const gender = 'gender' in patch ? patch.gender : current.gender;
+    const shiny = 'shiny' in patch ? patch.shiny : current.shiny;
 
     const nextMember: TeamMember = {
       speciesSlug: patch.speciesSlug ?? current.speciesSlug,
@@ -308,57 +243,36 @@ export const useTeamStore = create<TeamStoreState>((set, get) => ({
       ...(teraType ? { teraType } : {}),
       ...(level !== undefined ? { level } : {}),
       ...(nickname ? { nickname } : {}),
+      ...(gender ? { gender } : {}),
+      ...(shiny ? { shiny: true } : {}),
     };
 
-    team[slotIndex] = nextMember;
-    set({ team });
+    set({ team: withTeamSlot(team, slotIndex, nextMember) });
   },
 
   clearSlot(slotIndex) {
-    const { activeManifest, journeySnapshots } = get();
-    const team = [...get().team] as Team;
-    team[slotIndex] = null;
     const editingSlotIndex = get().editingSlotIndex === slotIndex ? null : get().editingSlotIndex;
-    const nextSnapshots = activeManifest
-      ? buildDefaultJourneyFromFinalTeam(team, activeManifest, pkmnDexGateway)
-      : journeySnapshots;
-
-    set({ team, editingSlotIndex, journeySnapshots: nextSnapshots });
+    set({ team: withTeamSlot(get().team, slotIndex, null), editingSlotIndex });
   },
 
   swapSlots(fromIndex, toIndex) {
     if (fromIndex === toIndex) return;
-    const team = [...get().team] as Team;
-    const temp = team[fromIndex];
-    team[fromIndex] = team[toIndex];
-    team[toIndex] = temp;
-    set({ team });
+    set({ team: swapTeamSlots(get().team, fromIndex, toIndex) });
   },
 
   resetTeam() {
-    const { activeManifest } = get();
+    const { context, teamsByScope } = get();
     const empty = createEmptyTeam();
+    const scopeKey = getScopeKey(context);
     set({
       team: empty,
       teamName: '',
+      teamsByScope: {
+        ...teamsByScope,
+        [scopeKey]: { team: empty, teamName: '' },
+      },
       editingSlotIndex: null,
-      pickerTarget: null,
-      pickerSlotIndex: null,
-      journeySnapshots: activeManifest
-        ? buildDefaultJourneyFromFinalTeam(empty, activeManifest, pkmnDexGateway)
-        : {},
     });
-  },
-
-  openPicker(slotIndex, checkpointId) {
-    set({
-      pickerSlotIndex: slotIndex,
-      pickerTarget: checkpointId ? { slotIndex, checkpointId } : { slotIndex },
-    });
-  },
-
-  closePicker() {
-    set({ pickerSlotIndex: null, pickerTarget: null });
   },
 
   openEditor(slotIndex) {
@@ -374,59 +288,18 @@ export const useTeamStore = create<TeamStoreState>((set, get) => ({
     if (shared.mode === 'campaign' && shared.gameId) {
       const manifest = await loadGameManifest(shared.gameId);
       if (manifest) {
-        const versionId = shared.versionId ?? manifest.versions[0]?.id;
-        const context: CampaignGameContext = {
-          mode: 'campaign',
-          gameId: manifest.id,
-          ...(versionId ? { versionId } : {}),
-          generation: manifest.generation,
-          mechanics: manifest.mechanics,
-        };
-        const sanitized = sanitizeTeamForContext(shared.team, context);
-        set({
-          context,
-          activeManifest: manifest,
-          activeCheckpointId: manifest.checkpoints[0]?.id ?? null,
-          journeySnapshots: buildDefaultJourneyFromFinalTeam(sanitized, manifest, pkmnDexGateway),
-          teamName: shared.teamName ?? '',
-          team: sanitized,
-          editingSlotIndex: null,
-          pickerTarget: null,
-          pickerSlotIndex: null,
-        });
+        set(buildCampaignLoadState(manifest, shared.team, shared.teamName ?? '', shared.versionId));
         return;
       }
     }
 
-    const context = createFreeModeContext(shared.generation);
-    set({
-      context,
-      activeManifest: null,
-      activeCheckpointId: null,
-      journeySnapshots: {},
-      teamName: shared.teamName ?? '',
-      team: sanitizeTeamForContext(shared.team, context),
-      editingSlotIndex: null,
-      pickerTarget: null,
-      pickerSlotIndex: null,
-    });
+    set(buildFreeLoadState(shared.generation, shared.team, shared.teamName ?? ''));
   },
 
   hydrateTeam(team) {
-    const { context, activeManifest } = get();
-    const sanitized = sanitizeTeamForContext(team, context);
-    set({
-      team: sanitized,
-      ...(activeManifest
-        ? {
-            journeySnapshots: buildDefaultJourneyFromFinalTeam(
-              sanitized,
-              activeManifest,
-              pkmnDexGateway,
-            ),
-          }
-        : {}),
-    });
+    const { context } = get();
+    const sanitized = sanitizeTeamForContext(team, context, pkmnDexGateway);
+    set({ team: sanitized });
   },
 
   async loadSavedTeams() {
@@ -439,14 +312,10 @@ export const useTeamStore = create<TeamStoreState>((set, get) => ({
     const resolvedName =
       customName?.trim() ||
       teamName.trim() ||
-      (context.mode === 'campaign' ? `${context.gameId} Run` : `Gen ${context.generation} Team`);
-    const id =
-      typeof crypto !== 'undefined' && 'randomUUID' in crypto
-        ? crypto.randomUUID()
-        : `team-${Date.now()}`;
+      (context.mode === 'campaign' ? `${context.gameId} Run` : 'Free Mode Team');
 
     const record: SavedTeamRecord = {
-      id,
+      id: generateEntityId('team'),
       name: resolvedName,
       updatedAt: new Date().toISOString(),
       mode: context.mode,
@@ -468,42 +337,12 @@ export const useTeamStore = create<TeamStoreState>((set, get) => ({
     if (target.mode === 'campaign' && target.gameId) {
       const manifest = await loadGameManifest(target.gameId);
       if (manifest) {
-        const versionId = target.versionId ?? manifest.versions[0]?.id;
-        const nextContext: CampaignGameContext = {
-          mode: 'campaign',
-          gameId: manifest.id,
-          ...(versionId ? { versionId } : {}),
-          generation: manifest.generation,
-          mechanics: manifest.mechanics,
-        };
-        const sanitized = sanitizeTeamForContext(target.team, nextContext);
-        set({
-          context: nextContext,
-          activeManifest: manifest,
-          activeCheckpointId: manifest.checkpoints[0]?.id ?? null,
-          journeySnapshots: buildDefaultJourneyFromFinalTeam(sanitized, manifest, pkmnDexGateway),
-          teamName: target.name,
-          team: sanitized,
-          editingSlotIndex: null,
-          pickerTarget: null,
-          pickerSlotIndex: null,
-        });
+        set(buildCampaignLoadState(manifest, target.team, target.name, target.versionId));
         return;
       }
     }
 
-    const nextContext = createFreeModeContext(target.generation);
-    set({
-      context: nextContext,
-      activeManifest: null,
-      activeCheckpointId: null,
-      journeySnapshots: {},
-      teamName: target.name,
-      team: sanitizeTeamForContext(target.team, nextContext),
-      editingSlotIndex: null,
-      pickerTarget: null,
-      pickerSlotIndex: null,
-    });
+    set(buildFreeLoadState(target.generation, target.team, target.name));
   },
 
   async deleteSavedTeam(id) {

@@ -85,4 +85,110 @@ describe('useTeamStore Seam', () => {
     await store.deleteSavedTeam(saved.id);
     expect(useTeamStore.getState().savedTeams.some((t) => t.id === saved.id)).toBe(false);
   });
+
+  it('toggles gender (including dimorphic formes and genderless guards) and shiny flags', () => {
+    const store = useTeamStore.getState();
+    store.selectFreeMode();
+    const ctx = useTeamStore.getState().context;
+    expect(ctx.mode).toBe('free');
+    if (ctx.mode === 'free') {
+      expect(ctx.unrestricted).toBe(true);
+    }
+
+    store.addSpeciesToTeam('pikachu');
+    expect(useTeamStore.getState().team[0]?.speciesSlug).toBe('pikachu');
+
+    store.addSpeciesToTeam('magnemite');
+    store.addSpeciesToTeam('meowstic');
+    expect(useTeamStore.getState().team[1]?.speciesSlug).toBe('magnemite');
+    expect(useTeamStore.getState().team[2]?.speciesSlug).toBe('meowstic');
+
+    // Toggle shiny
+    store.toggleSlotShiny(0);
+    expect(useTeamStore.getState().team[0]?.shiny).toBe(true);
+    store.toggleSlotShiny(0);
+    expect(useTeamStore.getState().team[0]?.shiny).toBeUndefined();
+
+    // Toggle gender on Pikachu (M <-> F)
+    store.toggleSlotGender(0);
+    expect(useTeamStore.getState().team[0]?.gender).toBe('F');
+    store.toggleSlotGender(0);
+    expect(useTeamStore.getState().team[0]?.gender).toBe('M');
+
+    // Genderless Magnemite stays unchanged
+    store.toggleSlotGender(1);
+    expect(useTeamStore.getState().team[1]?.gender).toBe('N');
+
+    // Dimorphic Meowstic swaps between Male and Female formes
+    store.toggleSlotGender(2);
+    expect(useTeamStore.getState().team[2]?.speciesSlug).toBe('meowsticf');
+    expect(useTeamStore.getState().team[2]?.gender).toBe('F');
+    store.toggleSlotGender(2);
+    expect(useTeamStore.getState().team[2]?.speciesSlug).toBe('meowstic');
+    expect(useTeamStore.getState().team[2]?.gender).toBe('M');
+
+    // Clearing slot 0 removes Pikachu cleanly
+    store.clearSlot(0);
+    expect(useTeamStore.getState().team[0]).toBeNull();
+  });
+
+  it('allows adding duplicate Pokémon via addSpeciesToTeam and isolates teams per game', () => {
+    const store = useTeamStore.getState();
+    store.selectFreeMode();
+    store.addSpeciesToTeam('pikachu');
+    store.addSpeciesToTeam('pikachu');
+    expect(useTeamStore.getState().team[0]?.speciesSlug).toBe('pikachu');
+    expect(useTeamStore.getState().team[1]?.speciesSlug).toBe('pikachu');
+
+    const fireRedManifest = {
+      id: 'firered-leafgreen',
+      name: 'Pokémon FireRed & LeafGreen',
+      shortName: 'FRLG',
+      generation: 3 as const,
+      region: 'Kanto',
+      versionGroup: 'firered-leafgreen',
+      versions: [{ id: 'firered', name: 'FireRed' }],
+      mechanics: {
+        hasAbilities: true,
+        hasHeldItems: true,
+        hasNatures: true,
+        physicalSpecialSplit: false,
+        gimmick: null,
+      },
+      checkpoints: [],
+      dex: {},
+    };
+
+    const blackWhiteManifest = {
+      ...fireRedManifest,
+      id: 'black-white',
+      name: 'Pokémon Black & White',
+      shortName: 'BW',
+      generation: 5 as const,
+      region: 'Unova',
+      versionGroup: 'black-white',
+      versions: [{ id: 'black', name: 'Black' }],
+      mechanics: {
+        hasAbilities: true,
+        hasHeldItems: true,
+        hasNatures: true,
+        physicalSpecialSplit: true,
+        gimmick: null,
+      },
+    };
+
+    store.selectCampaignGame(fireRedManifest);
+    expect(useTeamStore.getState().team.every((s) => s === null)).toBe(true);
+    store.addSpeciesToTeam('charizard');
+    expect(useTeamStore.getState().team[0]?.speciesSlug).toBe('charizard');
+
+    // Switching to Black & White should start with an empty team, not FireRed's Charizard
+    store.selectCampaignGame(blackWhiteManifest);
+    expect(useTeamStore.getState().team.every((s) => s === null)).toBe(true);
+    store.addSpeciesToTeam('serperior');
+
+    // Returning to FireRed restores FireRed's Charizard
+    store.selectCampaignGame(fireRedManifest);
+    expect(useTeamStore.getState().team[0]?.speciesSlug).toBe('charizard');
+  });
 });
