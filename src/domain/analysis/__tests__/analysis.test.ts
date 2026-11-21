@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { pkmnDexGateway } from '@/data/dex/pkmnDexGateway';
 import {
   analyzeTeam,
@@ -6,10 +6,14 @@ import {
   analyzeTeamOffense,
   analyzeTeamStats,
 } from '@/domain/analysis';
-import { createEmptyTeam } from '@/domain/sharing';
+import { createEmptyTeam } from '@/domain/team';
 import { createFreeModeContext, type Team } from '@/domain/types';
 
 describe('Domain Analysis Seam', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   describe('analyzeTeamDefense', () => {
     it('flags shared unresisted weaknesses as critical and updates when an immunity is added', () => {
       const gen5 = createFreeModeContext(5);
@@ -71,6 +75,29 @@ describe('Domain Analysis Seam', () => {
       const ghostRow = defense.rows.find((r) => r.attackType === 'Ghost');
       expect(ghostRow?.immuneCount).toBe(2);
     });
+
+    it('counts fractional 1.25x (Dry Skin) and 1.5x (Filter/Solid Rock) weaknesses as weak', () => {
+      const gen5 = createFreeModeContext(5);
+      const team: Team = [
+        { speciesSlug: 'toxicroak', abilitySlug: 'dryskin', moveSlugs: [] },
+        { speciesSlug: 'rhyperior', abilitySlug: 'solidrock', moveSlugs: [] },
+        null,
+        null,
+        null,
+        null,
+      ];
+
+      const profile = analyzeTeamDefense(team, gen5, pkmnDexGateway);
+      const fireRow = profile.rows.find((r) => r.attackType === 'Fire');
+      const iceRow = profile.rows.find((r) => r.attackType === 'Ice');
+
+      // Dry Skin makes Toxicroak 1.25x weak to Fire while Rhyperior resists Fire 0.5x
+      expect(fireRow?.slots[0]?.multiplier).toBe(1.25);
+      expect(fireRow?.weakCount).toBe(1);
+      // Solid Rock makes Rhyperior 1.5x weak to Ice
+      expect(iceRow?.slots[1]?.multiplier).toBe(1.5);
+      expect(iceRow?.weakCount).toBe(1);
+    });
   });
 
   describe('analyzeTeamOffense', () => {
@@ -93,6 +120,22 @@ describe('Domain Analysis Seam', () => {
       expect(offense.movesetBlindSpots).not.toContain('Dragon');
       // Still no super-effective hit against Electric
       expect(offense.movesetBlindSpots).toContain('Electric');
+    });
+
+    it('resolves each configured move only once instead of repeating dex.getMove per target type', () => {
+      const getMoveSpy = vi.spyOn(pkmnDexGateway, 'getMove');
+      const team: Team = [
+        { speciesSlug: 'pikachu', moveSlugs: ['thunderbolt', 'surf'] },
+        null,
+        null,
+        null,
+        null,
+        null,
+      ];
+
+      const offense = analyzeTeamOffense(team, createFreeModeContext(9), pkmnDexGateway);
+      expect(offense.hasDamagingMoves).toBe(true);
+      expect(getMoveSpy).toHaveBeenCalledTimes(2);
     });
   });
 

@@ -1,3 +1,4 @@
+import { ANALYSIS_INSIGHT_THRESHOLDS } from '@/domain/constants';
 import type { DexGateway, GameContext, PokemonType, Team } from '@/domain/types';
 import { analyzeTeamDefense, type DefensiveProfile } from './defensiveAnalysis';
 import { analyzeTeamOffense, type OffensiveCoverage } from './offensiveAnalysis';
@@ -54,17 +55,23 @@ function buildInsights(
     ? offense.movesetBlindSpots
     : offense.stabBlindSpots;
 
-  if (activeBlindSpots.length > 0 && stats.memberCount >= 2) {
+  if (
+    activeBlindSpots.length > 0 &&
+    stats.memberCount >= ANALYSIS_INSIGHT_THRESHOLDS.minMembersForOffense
+  ) {
     const modeLabel = offense.hasDamagingMoves ? 'selected moveset' : 'STAB typing';
     insights.push({
       id: 'offensive-blind-spots',
-      severity: activeBlindSpots.length >= 5 ? 'warning' : 'warning',
+      severity: 'warning',
       category: 'offense',
       title: `${activeBlindSpots.length} offensive blind spot${activeBlindSpots.length === 1 ? '' : 's'} (${modeLabel})`,
       detail: `Your team currently lacks super-effective hits against: ${activeBlindSpots.join(', ')}.`,
       types: activeBlindSpots,
     });
-  } else if (stats.memberCount >= 3 && activeBlindSpots.length === 0) {
+  } else if (
+    stats.memberCount >= ANALYSIS_INSIGHT_THRESHOLDS.minMembersForFullOffense &&
+    activeBlindSpots.length === 0
+  ) {
     insights.push({
       id: 'complete-offense',
       severity: 'positive',
@@ -76,14 +83,14 @@ function buildInsights(
     });
   }
 
-  if (stats.memberCount >= 3) {
+  if (stats.memberCount >= ANALYSIS_INSIGHT_THRESHOLDS.minMembersForStatBias) {
     const totalDamaging = stats.moveSplit.physical + stats.moveSplit.special;
     const isPhysicalSkew =
-      totalDamaging >= 4
+      totalDamaging >= ANALYSIS_INSIGHT_THRESHOLDS.minDamagingMovesForSkewCheck
         ? stats.moveSplit.special === 0
         : stats.biasSplit.specialAttackers === 0 && stats.biasSplit.mixedAttackers === 0;
     const isSpecialSkew =
-      totalDamaging >= 4
+      totalDamaging >= ANALYSIS_INSIGHT_THRESHOLDS.minDamagingMovesForSkewCheck
         ? stats.moveSplit.physical === 0
         : stats.biasSplit.physicalAttackers === 0 && stats.biasSplit.mixedAttackers === 0;
 
@@ -107,7 +114,10 @@ function buildInsights(
       });
     }
 
-    if (stats.peaks.spe < 80 && stats.averages.spe < 65) {
+    if (
+      stats.peaks.spe < ANALYSIS_INSIGHT_THRESHOLDS.lowSpeedPeakThreshold &&
+      stats.averages.spe < ANALYSIS_INSIGHT_THRESHOLDS.lowSpeedAvgThreshold
+    ) {
       insights.push({
         id: 'low-speed-tier',
         severity: 'warning',

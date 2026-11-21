@@ -1,10 +1,11 @@
+import { DEFENSE_SEVERITY_THRESHOLDS } from '@/domain/constants';
 import {
   calculateDefensiveMultiplier,
   type DefensiveMultiplierResult,
   getAvailableTypes,
 } from '@/domain/mechanics';
+import { resolveTeamEntries } from '@/domain/team';
 import type { DexGateway, GameContext, PokemonType, Team } from '@/domain/types';
-import { resolveTeamEntries } from './helpers';
 
 export type WeaknessSeverity = 'critical' | 'warning' | 'balanced' | 'strong';
 
@@ -37,21 +38,23 @@ function classifySeverity(
   const mitigation = resistCount + immuneCount;
 
   if (
-    (weakCount >= 3 && mitigation === 0) ||
-    (quadWeakCount >= 1 && mitigation === 0 && weakCount >= 2)
+    (weakCount >= DEFENSE_SEVERITY_THRESHOLDS.criticalUncoveredWeakMin && mitigation === 0) ||
+    (quadWeakCount >= 1 &&
+      mitigation === 0 &&
+      weakCount >= DEFENSE_SEVERITY_THRESHOLDS.criticalQuadComboWeakMin)
   ) {
     return 'critical';
   }
 
   if (
-    weakCount >= 3 ||
-    (weakCount >= 2 && mitigation === 0) ||
+    weakCount >= DEFENSE_SEVERITY_THRESHOLDS.warningAnyWeakMin ||
+    (weakCount >= DEFENSE_SEVERITY_THRESHOLDS.warningUncoveredWeakMin && mitigation === 0) ||
     (quadWeakCount >= 1 && mitigation === 0)
   ) {
     return 'warning';
   }
 
-  if (mitigation >= 2 && weakCount === 0) {
+  if (mitigation >= DEFENSE_SEVERITY_THRESHOLDS.strongMitigationMin && weakCount === 0) {
     return 'strong';
   }
 
@@ -101,11 +104,11 @@ export function analyzeTeamDefense(
         immuneCount += 1;
       } else if (result.multiplier < 1) {
         resistCount += 1;
-      } else if (result.multiplier >= 4) {
+      } else if (result.multiplier > 1) {
         weakCount += 1;
-        quadWeakCount += 1;
-      } else if (result.multiplier >= 2) {
-        weakCount += 1;
+        if (result.multiplier >= 4) {
+          quadWeakCount += 1;
+        }
       }
     }
 
@@ -131,7 +134,12 @@ export function analyzeTeamDefense(
 
     if (entries.length > 0) {
       if (severity === 'critical') criticalWeaknesses.push(attackType);
-      if (weakCount >= 2 && resistCount + immuneCount === 0) uncoveredWeaknesses.push(attackType);
+      if (
+        weakCount >= DEFENSE_SEVERITY_THRESHOLDS.warningUncoveredWeakMin &&
+        resistCount + immuneCount === 0
+      ) {
+        uncoveredWeaknesses.push(attackType);
+      }
       if (severity === 'strong') strongResistances.push(attackType);
     }
   }

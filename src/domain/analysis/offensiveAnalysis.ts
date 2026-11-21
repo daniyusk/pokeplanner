@@ -1,6 +1,7 @@
+import { MOVE_CATEGORY } from '@/domain/constants';
 import { calculateTypeEffectiveness, getAvailableTypes } from '@/domain/mechanics';
+import { resolveTeamEntries } from '@/domain/team';
 import type { DexGateway, GameContext, PokemonType, Team, TeamSlotIndex } from '@/domain/types';
-import { resolveTeamEntries } from './helpers';
 
 export interface OffensiveContributor {
   slotIndex: TeamSlotIndex;
@@ -40,17 +41,22 @@ export function analyzeTeamOffense(
   const availableTypes = getAvailableTypes(context.generation, dex);
   const teamEntries = resolveTeamEntries(team, context.generation, dex);
 
-  let hasDamagingMoves = false;
-  for (const entry of teamEntries) {
+  const memberDamagingMoves = teamEntries.map((entry) => {
+    const moves: Array<{ type: PokemonType; name: string; isStab: boolean }> = [];
     for (const moveSlug of entry.member.moveSlugs) {
       const move = dex.getMove(moveSlug, context.generation);
-      if (move && move.category !== 'Status' && move.basePower > 0) {
-        hasDamagingMoves = true;
-        break;
+      if (move && move.category !== MOVE_CATEGORY.Status && move.basePower > 0) {
+        moves.push({
+          type: move.type,
+          name: move.name,
+          isStab: entry.species.types.includes(move.type),
+        });
       }
     }
-    if (hasDamagingMoves) break;
-  }
+    return { entry, moves };
+  });
+
+  const hasDamagingMoves = memberDamagingMoves.some((item) => item.moves.length > 0);
 
   const entries: OffensiveCoverageEntry[] = [];
   const stabBlindSpots: PokemonType[] = [];
@@ -62,7 +68,7 @@ export function analyzeTeamOffense(
     const stabContributors: OffensiveContributor[] = [];
     const movesetContributors: OffensiveContributor[] = [];
 
-    for (const entry of teamEntries) {
+    for (const { entry, moves } of memberDamagingMoves) {
       for (const stabType of entry.species.types) {
         const eff = calculateTypeEffectiveness(stabType, [targetType], context.generation, dex);
         if (eff >= 2) {
@@ -75,10 +81,7 @@ export function analyzeTeamOffense(
         }
       }
 
-      for (const moveSlug of entry.member.moveSlugs) {
-        const move = dex.getMove(moveSlug, context.generation);
-        if (!move || move.category === 'Status' || move.basePower <= 0) continue;
-
+      for (const move of moves) {
         const eff = calculateTypeEffectiveness(move.type, [targetType], context.generation, dex);
         if (eff >= 2) {
           movesetContributors.push({
@@ -86,7 +89,7 @@ export function analyzeTeamOffense(
             speciesName: entry.species.name,
             attackType: move.type,
             moveName: move.name,
-            isStab: entry.species.types.includes(move.type),
+            isStab: move.isStab,
           });
         }
       }

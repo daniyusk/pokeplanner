@@ -1,3 +1,4 @@
+export { type ResolvedTeamEntry, resolveTeamEntries } from '@/domain/team';
 export {
   analyzeTeamDefense,
   type DefensiveProfile,

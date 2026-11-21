@@ -1,13 +1,7 @@
+import { MOVE_CATEGORY, STAT_BIAS_DIFF_THRESHOLD, STAT_KEYS } from '@/domain/constants';
 import { getEffectiveMoveCategory } from '@/domain/mechanics';
-import type {
-  DexGateway,
-  GameContext,
-  StatId,
-  StatsTable,
-  Team,
-  TeamSlotIndex,
-} from '@/domain/types';
-import { resolveTeamEntries } from './helpers';
+import { resolveTeamEntries } from '@/domain/team';
+import type { DexGateway, GameContext, StatsTable, Team, TeamSlotIndex } from '@/domain/types';
 
 export interface MemberStatSummary {
   slotIndex: TeamSlotIndex;
@@ -32,8 +26,6 @@ export interface TeamStatProfile {
     mixedAttackers: number;
   };
 }
-
-const STAT_KEYS: readonly StatId[] = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
 
 function emptyStats(): StatsTable {
   return { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
@@ -72,15 +64,15 @@ export function analyzeTeamStats(
       }
     }
 
-    if (s.atk - s.spa >= 15) physicalAttackers += 1;
-    else if (s.spa - s.atk >= 15) specialAttackers += 1;
+    if (s.atk - s.spa >= STAT_BIAS_DIFF_THRESHOLD) physicalAttackers += 1;
+    else if (s.spa - s.atk >= STAT_BIAS_DIFF_THRESHOLD) specialAttackers += 1;
     else mixedAttackers += 1;
 
     for (const moveSlug of entry.member.moveSlugs) {
       const cat = getEffectiveMoveCategory(moveSlug, context, dex);
-      if (cat === 'Physical') physicalMoves += 1;
-      else if (cat === 'Special') specialMoves += 1;
-      else if (cat === 'Status') statusMoves += 1;
+      if (cat === MOVE_CATEGORY.Physical) physicalMoves += 1;
+      else if (cat === MOVE_CATEGORY.Special) specialMoves += 1;
+      else if (cat === MOVE_CATEGORY.Status) statusMoves += 1;
     }
 
     return {
