@@ -295,13 +295,6 @@ export const GOLD_SILVER_CRYSTAL_DEF: CampaignSourceDef = {
     { id: 'silver', name: 'Silver' },
     { id: 'crystal', name: 'Crystal' },
   ],
-  mechanics: {
-    hasAbilities: false,
-    hasHeldItems: true,
-    hasNatures: false,
-    physicalSpecialSplit: false,
-    gimmick: null,
-  },
   checkpoints: JOHTO_CHECKPOINTS,
   encounters: JOHTO_ENCOUNTERS,
 };
@@ -317,13 +310,6 @@ export const HEARTGOLD_SOULSILVER_DEF: CampaignSourceDef = {
     { id: 'heartgold', name: 'HeartGold' },
     { id: 'soulsilver', name: 'SoulSilver' },
   ],
-  mechanics: {
-    hasAbilities: true,
-    hasHeldItems: true,
-    hasNatures: true,
-    physicalSpecialSplit: true,
-    gimmick: null,
-  },
   checkpoints: JOHTO_CHECKPOINTS,
   encounters: [
     ...JOHTO_ENCOUNTERS,

@@ -1,14 +1,15 @@
 import { Generations, type Dex as PkmnDexInterface, toID } from '@pkmn/data';
 import { Dex } from '@pkmn/dex';
-import type {
-  Checkpoint,
-  EncounterLocation,
-  EncounterMethod,
-  GameDexEntry,
-  GameManifest,
-  GameMechanicsFlags,
-  GameVersionInfo,
-  GenerationNumber,
+import {
+  type Checkpoint,
+  type EncounterLocation,
+  type EncounterMethod,
+  type GameDexEntry,
+  type GameManifest,
+  type GameMechanicsFlags,
+  type GameVersionInfo,
+  type GenerationNumber,
+  getDefaultMechanicsForGeneration,
 } from '../../src/domain/types';
 
 export interface CuratedEncounter {
@@ -31,7 +32,7 @@ export interface CampaignSourceDef {
   region: string;
   versionGroup: string;
   versions: readonly GameVersionInfo[];
-  mechanics: GameMechanicsFlags;
+  mechanics?: GameMechanicsFlags;
   checkpoints: readonly Checkpoint[];
   encounters: readonly CuratedEncounter[];
   /** Species in this game that are locked behind post-game (e.g., National Dex) */
@@ -64,6 +65,8 @@ function makeDexEntry(
  */
 export function buildGameManifest(def: CampaignSourceDef): GameManifest {
   const gen = generations.get(def.generation);
+  const mechanics = def.mechanics ?? getDefaultMechanicsForGeneration(def.generation);
+  const validVersionIds = new Set(def.versions.map((v) => v.id));
   const checkpointOrder = new Map(def.checkpoints.map((cp) => [cp.id, cp.order]));
   const postGameSet = new Set((def.postGameSpecies ?? []).map((s) => toID(s)));
   const lastCheckpoint = def.checkpoints[def.checkpoints.length - 1];
@@ -88,6 +91,15 @@ export function buildGameManifest(def: CampaignSourceDef): GameManifest {
   for (const enc of def.encounters) {
     if (!checkpointOrder.has(enc.checkpointId)) {
       throw new Error(`Invalid checkpointId "${enc.checkpointId}" in campaign "${def.id}".`);
+    }
+    if (enc.exclusiveToVersions) {
+      for (const versionId of enc.exclusiveToVersions) {
+        if (!validVersionIds.has(versionId)) {
+          throw new Error(
+            `Encounter in campaign "${def.id}" references unknown version "${versionId}".`,
+          );
+        }
+      }
     }
 
     for (const rawSpecies of enc.species) {
@@ -223,7 +235,7 @@ export function buildGameManifest(def: CampaignSourceDef): GameManifest {
     region: def.region,
     versionGroup: def.versionGroup,
     versions: def.versions,
-    mechanics: def.mechanics,
+    mechanics,
     checkpoints: def.checkpoints,
     dex: dexMap,
   };

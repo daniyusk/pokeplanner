@@ -8,13 +8,6 @@ export const EMERALD_DEF: CampaignSourceDef = {
   region: 'Hoenn',
   versionGroup: 'emerald',
   versions: [{ id: 'emerald', name: 'Emerald' }],
-  mechanics: {
-    hasAbilities: true,
-    hasHeldItems: true,
-    hasNatures: true,
-    physicalSpecialSplit: false,
-    gimmick: null,
-  },
   checkpoints: [
     {
       id: 'gym-1-roxanne',

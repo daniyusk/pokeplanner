@@ -402,7 +402,7 @@
           "maxLevel": 12
         }
       ],
-      "exclusiveToVersions": ["blue", "leafgreen"]
+      "exclusiveToVersions": ["leafgreen"]
     },
     "ekans": {
       "regionalDexNumber": 22,
@@ -416,7 +416,7 @@
           "maxLevel": 12
         }
       ],
-      "exclusiveToVersions": ["red", "firered"]
+      "exclusiveToVersions": ["firered"]
     },
     "meowth": {
       "regionalDexNumber": 23,
@@ -521,7 +521,7 @@
           "maxLevel": 20
         }
       ],
-      "exclusiveToVersions": ["red", "firered"]
+      "exclusiveToVersions": ["firered"]
     },
     "vulpix": {
       "regionalDexNumber": 31,
@@ -535,7 +535,7 @@
           "maxLevel": 20
         }
       ],
-      "exclusiveToVersions": ["blue", "leafgreen"]
+      "exclusiveToVersions": ["leafgreen"]
     },
     "eevee": {
       "regionalDexNumber": 32,
@@ -1367,7 +1367,7 @@
           "method": "evolve"
         }
       ],
-      "exclusiveToVersions": ["blue", "leafgreen"],
+      "exclusiveToVersions": ["leafgreen"],
       "evolutionNotes": {
         "requiresTrade": false,
         "minEvolutionLevel": 22
@@ -1383,7 +1383,7 @@
           "method": "evolve"
         }
       ],
-      "exclusiveToVersions": ["red", "firered"],
+      "exclusiveToVersions": ["firered"],
       "evolutionNotes": {
         "requiresTrade": false,
         "minEvolutionLevel": 22
@@ -1504,7 +1504,7 @@
           "method": "evolve"
         }
       ],
-      "exclusiveToVersions": ["red", "firered"],
+      "exclusiveToVersions": ["firered"],
       "evolutionNotes": {
         "requiresTrade": false,
         "requiresItem": "Fire Stone"
@@ -1520,7 +1520,7 @@
           "method": "evolve"
         }
       ],
-      "exclusiveToVersions": ["blue", "leafgreen"],
+      "exclusiveToVersions": ["leafgreen"],
       "evolutionNotes": {
         "requiresTrade": false,
         "requiresItem": "Fire Stone"

@@ -11,13 +11,6 @@ export const BLACK_WHITE_DEF: CampaignSourceDef = {
     { id: 'black', name: 'Black' },
     { id: 'white', name: 'White' },
   ],
-  mechanics: {
-    hasAbilities: true,
-    hasHeldItems: true,
-    hasNatures: true,
-    physicalSpecialSplit: true,
-    gimmick: null,
-  },
   checkpoints: [
     {
       id: 'gym-1-striaton',
@@ -300,13 +293,6 @@ export const BLACK2_WHITE2_DEF: CampaignSourceDef = {
     { id: 'black-2', name: 'Black 2' },
     { id: 'white-2', name: 'White 2' },
   ],
-  mechanics: {
-    hasAbilities: true,
-    hasHeldItems: true,
-    hasNatures: true,
-    physicalSpecialSplit: true,
-    gimmick: null,
-  },
   checkpoints: [
     {
       id: 'gym-1-cheren',

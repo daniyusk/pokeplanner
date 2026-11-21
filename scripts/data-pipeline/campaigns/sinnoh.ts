@@ -8,13 +8,6 @@ export const PLATINUM_DEF: CampaignSourceDef = {
   region: 'Sinnoh',
   versionGroup: 'platinum',
   versions: [{ id: 'platinum', name: 'Platinum' }],
-  mechanics: {
-    hasAbilities: true,
-    hasHeldItems: true,
-    hasNatures: true,
-    physicalSpecialSplit: true,
-    gimmick: null,
-  },
   checkpoints: [
     {
       id: 'gym-1-roark',

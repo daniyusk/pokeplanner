@@ -26,6 +26,7 @@ function main() {
     const manifest = gameManifestSchema.parse(rawManifest);
 
     const checkpointIds = new Set(manifest.checkpoints.map((cp) => cp.id));
+    const validVersionIds = new Set(manifest.versions.map((v) => v.id));
     const gen = generations.get(manifest.generation);
 
     for (const cp of manifest.checkpoints) {
@@ -48,6 +49,13 @@ function main() {
         throw new Error(
           `[${manifest.id}] Dex species "${slug}" references unknown checkpoint "${dexEntry.earliestCheckpointId}"`,
         );
+      }
+      for (const versionId of dexEntry.exclusiveToVersions ?? []) {
+        if (!validVersionIds.has(versionId)) {
+          throw new Error(
+            `[${manifest.id}] Dex species "${slug}" references unknown version "${versionId}"`,
+          );
+        }
       }
     }
 
