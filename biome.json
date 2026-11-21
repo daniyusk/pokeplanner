@@ -7,7 +7,15 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**", "!dist", "!coverage", "!node_modules", "!**/*.md"]
+    "includes": [
+      "**",
+      "!dist",
+      "!coverage",
+      "!node_modules",
+      "!**/*.md",
+      "!.agents",
+      "!skills-lock.json"
+    ]
   },
   "formatter": {
     "enabled": true,

@@ -1,0 +1,65 @@
+{
+  "version": 2,
+  "skills": {
+    "architecture-and-design": {
+      "source": "danielteles/awesome-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/architecture-and-design/SKILL.md",
+      "computedHash": "53a1f96c6657da586c01b8421e32ee2d65979874f6a99401392b672b0127cc29"
+    },
+    "biome": {
+      "source": "bobmatnyc/claude-mpm-skills",
+      "sourceType": "github",
+      "skillPath": "toolchains/javascript/tooling/biome/SKILL.md",
+      "computedHash": "18d6a27a73cdabe037e05b958f004e820256deb4b87cb24daf9546ad033defd0"
+    },
+    "core-typescript": {
+      "source": "danielteles/awesome-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/core-typescript/SKILL.md",
+      "computedHash": "c79953c37b5b842dd7f801c3a8b22eadf865568a0cf5c537155bde3207ac2ec3"
+    },
+    "frontend-code-review": {
+      "source": "danielteles/awesome-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-code-review/SKILL.md",
+      "computedHash": "c5b89cd7b0d975770a017e42033fd366dc54db6090a7ca1fb093d9faa99589d7"
+    },
+    "react-patterns": {
+      "source": "giuseppe-trisciuoglio/developer-kit",
+      "sourceType": "github",
+      "skillPath": "plugins/developer-kit-typescript/skills/react-patterns/SKILL.md",
+      "computedHash": "2c220efce142eaa48d6b6c7412d2dfb110dec9edaa09877726e365911f73a8c4"
+    },
+    "refactoring-best-practices": {
+      "source": "luckys/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/refactoring-best-practices/SKILL.md",
+      "computedHash": "33522ce1aa338e3c431446a66313ae94ac2ee7db67c1d47189e8295dc5937d30"
+    },
+    "tailwind-design-system": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "skillPath": "plugins/frontend-mobile-development/skills/tailwind-design-system/SKILL.md",
+      "computedHash": "c807f0c9619e8c389879f55846c2e395956f1073ab6d01a93fbb30b340015ab1"
+    },
+    "typescript-react-reviewer": {
+      "source": "dotneet/claude-code-marketplace",
+      "sourceType": "github",
+      "skillPath": "review-tool/skills/typescript-react-reviewer/SKILL.md",
+      "computedHash": "5f345b10be5bbb15ceafea5616820c1a52b5353422a3e79b3f9ac57fd03adb0e"
+    },
+    "vitest": {
+      "source": "antfu/skills",
+      "sourceType": "github",
+      "skillPath": "skills/vitest/SKILL.md",
+      "computedHash": "bd95e41d66d76da9008893c9bc48c30f0a68f352cd2b00017767f5e4c129501d"
+    },
+    "zustand-patterns": {
+      "source": "yonatangross/orchestkit",
+      "sourceType": "github",
+      "skillPath": "plugins/ork-extras/skills/zustand-patterns/SKILL.md",
+      "computedHash": "1dc96ca2f7378487bbc68e0826c2044ed731602de5bfb9618361708f21cb2710"
+    }
+  }
+}
