@@ -38,7 +38,7 @@ export default defineConfig({
             options: {
               cacheName: 'pokemon-sprites-showdown',
               expiration: {
-                maxEntries: 1200,
+                maxEntries: 2500,
                 maxAgeSeconds: 60 * 60 * 24 * 30,
               },
               cacheableResponse: {
