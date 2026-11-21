@@ -208,7 +208,6 @@ export function TeamPlannerPage({ routeMode }: TeamPlannerPageProps) {
       return {};
     }
     return encodeTeamToSearchParams({
-      version: 2,
       mode: context.mode,
       generation: context.generation,
       ...(context.mode === 'campaign' ? { gameId: context.gameId } : {}),

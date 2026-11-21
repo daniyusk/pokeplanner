@@ -7,9 +7,9 @@
     "expectedGeneration": 5,
     "expectedSpecies": ["serperior", "lucario", "volcarona", "jellicent", "krookodile", "haxorus"]
   },
-  "v1Gen5Builds": {
+  "gen5Builds": {
     "params": {
-      "p": "v1_N4IgbiBcCMA0IFsogGYCcCmGTwOZQFZ4AXAO2QFVSB7MAQwAIBhACzoQAccRioBtPiADOGNB1EBLamm4BjaqWJo6aAJ7cANhhTFaood2ISEEgCY5BWuiiG60SeKeW4FHAK4aR3FmdMZSHNQA7qIoEpjcQm4ARrYSxG7E2AC6sKQeGmkZWRoaqYIA1mjU1AXUphJa3AjUAB4S2PCyLNQSshhCsioo3ABW1LnqsIIYKsQsAI5udAWNILJobqTNkbqkWKa4c1HiYsGiIKnpuTmZx3mnl+enyQC+QA"
+      "p": "N4IgtiBcIGYE4FMEgDQgOZQKxoC4DsoQBVfAewDcBDAAgGEALKsAB1RFygG0uQBnBHBaCAlmTjsAxmXy44VOAE92AGwQxclQX3a4RYEQBNUvNVRh9NcCGkPz0MlgFcVA9gyOGE+FmQDugjAiiOx8TgBGliK4TrjIALoo+C4qSSlpKqnJmRkqibwA1nBkZAVkhiJq7GBkAB4iyGiSDGQikgh8kgow7ABWZJnKKLwICrgMAI5OVAWNIJJwTvjNoZr4SIboc2HCQv6CIInZWenHublHp1c5x-EAvkA"
     },
     "expectedTeamName": "Unova Champ",
     "expectedGeneration": 5,

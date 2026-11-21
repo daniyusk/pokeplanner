@@ -98,8 +98,8 @@ describe('App Router & Shared URL Seam', () => {
     expect(useTeamStore.getState().context.generation).toBe(5);
   });
 
-  it('redirects v1_ shared Free Mode builds from / to /free and hydrates build details', async () => {
-    const { history } = renderAtUrl(`/?p=${frozenFixtures.v1Gen5Builds.params.p}`);
+  it('redirects shared Free Mode builds from / to /free and hydrates build details', async () => {
+    const { history } = renderAtUrl(`/?p=${frozenFixtures.gen5Builds.params.p}`);
 
     expect(await screen.findByText('Serperior')).toBeInTheDocument();
     await waitFor(() => {
@@ -124,9 +124,8 @@ describe('App Router & Shared URL Seam', () => {
     expect(await screen.findByRole('link', { name: /Back to Games/i })).toBeInTheDocument();
   });
 
-  it('redirects v2_ campaign shared URLs from / to /game/$gameId/team and loads campaign state', async () => {
+  it('redirects campaign shared URLs from / to /game/$gameId/team and loads campaign state', async () => {
     const campaignParams = encodeTeamToSearchParams({
-      version: 2,
       mode: 'campaign',
       generation: 4,
       gameId: 'platinum',
@@ -265,7 +264,7 @@ describe('App Router & Shared URL Seam', () => {
 
     expect(await screen.findByText('Pikachu')).toBeInTheDocument();
     await waitFor(() => {
-      expect(history.location.search).toMatch(/^\?p=v2_/);
+      expect(history.location.search).toMatch(/^\?p=(?!v\d+_)/);
     });
 
     // Toggling shiny updates the URL in place without reverting the team

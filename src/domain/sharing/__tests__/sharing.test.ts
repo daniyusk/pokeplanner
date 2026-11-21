@@ -11,10 +11,9 @@ import { createFreeModeContext, type Team } from '@/domain/types';
 import frozenFixtures from '../../../../tests/fixtures/shared-urls.json';
 
 describe('Domain Sharing Seam', () => {
-  describe('URL Codec (v1 & compact species)', () => {
+  describe('URL Codec & compact species', () => {
     it('encodes species-only Free Mode teams into readable compact query params and decodes back', () => {
       const state: ShareableTeamState = {
-        version: 1,
         mode: 'free',
         generation: 5,
         team: [
@@ -39,9 +38,8 @@ describe('Domain Sharing Seam', () => {
       }
     });
 
-    it('round-trips full 6-slot builds with abilities, items, natures, moves, and tera types via v1_ payload', () => {
+    it('round-trips full 6-slot builds with abilities, items, natures, moves, and tera types', () => {
       const state: ShareableTeamState = {
-        version: 1,
         mode: 'free',
         generation: 9,
         teamName: 'Paldea Core',
@@ -70,7 +68,8 @@ describe('Domain Sharing Seam', () => {
       };
 
       const params = encodeTeamToSearchParams(state);
-      expect(params.p).toMatch(/^v1_/);
+      expect(params.p).toBeTruthy();
+      expect(params.p).not.toMatch(/^v\d+_/);
       expect(params.s).toBeUndefined();
 
       const decoded = decodeTeamFromSearchParams(params, pkmnDexGateway);
@@ -80,9 +79,8 @@ describe('Domain Sharing Seam', () => {
       }
     });
 
-    it('round-trips gender and shiny flags via v2_ payload while preserving v1_ decoding', () => {
+    it('round-trips gender and shiny flags in compressed payloads', () => {
       const state: ShareableTeamState = {
-        version: 2,
         mode: 'free',
         generation: 9,
         team: [
@@ -106,7 +104,8 @@ describe('Domain Sharing Seam', () => {
       };
 
       const params = encodeTeamToSearchParams(state);
-      expect(params.p).toMatch(/^v2_/);
+      expect(params.p).toBeTruthy();
+      expect(params.p).not.toMatch(/^v\d+_/);
 
       const decoded = decodeTeamFromSearchParams(params, pkmnDexGateway);
       expect(decoded.ok).toBe(true);
@@ -115,11 +114,8 @@ describe('Domain Sharing Seam', () => {
       }
     });
 
-    it('returns a typed error for corrupted v1_ payloads or invalid generation params', () => {
-      const badPayload = decodeTeamFromSearchParams(
-        { p: 'v1_not_valid_compressed' },
-        pkmnDexGateway,
-      );
+    it('returns a typed error for corrupted payloads or invalid generation params', () => {
+      const badPayload = decodeTeamFromSearchParams({ p: 'not_valid_compressed' }, pkmnDexGateway);
       expect(badPayload.ok).toBe(false);
 
       const badGen = decodeTeamFromSearchParams(
@@ -142,15 +138,15 @@ describe('Domain Sharing Seam', () => {
         );
       }
 
-      const v1Decoded = decodeTeamFromSearchParams(
-        frozenFixtures.v1Gen5Builds.params,
+      const fullDecoded = decodeTeamFromSearchParams(
+        frozenFixtures.gen5Builds.params,
         pkmnDexGateway,
       );
-      expect(v1Decoded.ok).toBe(true);
-      if (v1Decoded.ok) {
-        expect(v1Decoded.state.teamName).toBe(frozenFixtures.v1Gen5Builds.expectedTeamName);
-        expect(v1Decoded.state.generation).toBe(frozenFixtures.v1Gen5Builds.expectedGeneration);
-        expect(v1Decoded.state.team[0]).toEqual(frozenFixtures.v1Gen5Builds.expectedFirstSlot);
+      expect(fullDecoded.ok).toBe(true);
+      if (fullDecoded.ok) {
+        expect(fullDecoded.state.teamName).toBe(frozenFixtures.gen5Builds.expectedTeamName);
+        expect(fullDecoded.state.generation).toBe(frozenFixtures.gen5Builds.expectedGeneration);
+        expect(fullDecoded.state.team[0]).toEqual(frozenFixtures.gen5Builds.expectedFirstSlot);
       }
     });
   });

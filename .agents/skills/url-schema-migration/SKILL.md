@@ -7,9 +7,9 @@ description: >-
 
 # URL Schema Migration Runbook
 
-Shareable team links are **permanent** and have no server-side database. Breaking old URLs invalidates every link ever shared by users.
+Shareable team links are **permanent** and have no server-side database. Once publicly deployed, breaking existing URLs invalidates links shared by users.
 
-1. **Never Mutate Existing Decoder Versions**: Keep `v1` (`v1_`) decoding logic intact forever.
-2. **Versioned Extensions (`v2_` and beyond)**: `v2_` adds `gender` and `shiny` tuple slots while preserving `v1_` compatibility. Any future structural change must introduce `v3_` while retaining all prior decoders.
+1. **Preserve Published Tuple Positions**: Never reorder or remove fields in `compactSlotTupleSchema` (`speciesSlug`, `abilitySlug`, `itemSlug`, `natureId`, `moveSlugs`, `teraType`, `level`, `nickname`, `gender`, `shiny`) without keeping full backward decoding for existing `p` payloads.
+2. **Safe Schema Evolution**: Any future breaking structural change after launch must introduce an explicit discriminator or prefix while retaining decoding support for the original unprefixed `p` format.
 3. **Freeze Regression Fixtures**: Before changing encoder output, verify all existing frozen URLs in `tests/fixtures/shared-urls.json` still decode identically.
-4. **Round-Trip Property Check**: Verify `decodeTeamUrl(encodeTeamUrl(state))` equals `state` across empty slots, full 6-slot builds (with gender/shiny), Free Mode, and campaign teams.
+4. **Round-Trip Property Check**: Verify `decodeTeamFromSearchParams(encodeTeamToSearchParams(state), dex)` equals `state` across empty slots, full 6-slot builds (with gender/shiny), Free Mode, and campaign teams.

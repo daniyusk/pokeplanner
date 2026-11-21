@@ -14,7 +14,6 @@ import { createEmptyTeam, mapTeamSlots, sanitizeTeamMember } from '@/domain/team
 import type { DexGateway, GenerationNumber, Team, TeamMember, TeamSlot } from '@/domain/types';
 
 export interface ShareableTeamState {
-  version: 1 | 2;
   mode: 'free' | 'campaign';
   generation: GenerationNumber;
   gameId?: string;
@@ -33,38 +32,27 @@ export type DecodeTeamResult =
   | { ok: true; state: ShareableTeamState; warnings: readonly string[] }
   | { ok: false; error: string };
 
-const compactSlotFields = [
-  z.string().min(1), // speciesSlug
-  z.string().nullable(), // abilitySlug
-  z.string().nullable(), // itemSlug
-  z.string().nullable(), // natureId
-  moveSlugsSchema, // moveSlugs
-  pokemonTypeSchema.nullable(), // teraType
-  levelSchema.nullable(), // level
-  nicknameSchema.nullable(), // nickname
-] as const;
-
-const compactSlotTupleSchema = z.tuple([...compactSlotFields]).nullable();
-
-const compactSlotV2TupleSchema = z
+const compactSlotTupleSchema = z
   .tuple([
-    ...compactSlotFields,
+    z.string().min(1), // speciesSlug
+    z.string().nullable(), // abilitySlug
+    z.string().nullable(), // itemSlug
+    z.string().nullable(), // natureId
+    moveSlugsSchema, // moveSlugs
+    pokemonTypeSchema.nullable(), // teraType
+    levelSchema.nullable(), // level
+    nicknameSchema.nullable(), // nickname
     genderSchema.nullable(), // gender
     z.boolean().nullable(), // shiny
   ])
   .nullable();
 
-const payloadMetaShape = {
+const teamPayloadSchema = z.object({
   m: z.enum(['free', 'campaign']),
   g: generationSchema,
   gi: z.string().optional(),
   vi: z.string().optional(),
   tn: teamNameSchema.optional(),
-};
-
-const v1PayloadSchema = z.object({
-  ...payloadMetaShape,
-  v: z.literal(1),
   t: z.tuple([
     compactSlotTupleSchema,
     compactSlotTupleSchema,
@@ -72,24 +60,10 @@ const v1PayloadSchema = z.object({
     compactSlotTupleSchema,
     compactSlotTupleSchema,
     compactSlotTupleSchema,
-  ]),
-});
-
-const v2PayloadSchema = z.object({
-  ...payloadMetaShape,
-  v: z.literal(2),
-  t: z.tuple([
-    compactSlotV2TupleSchema,
-    compactSlotV2TupleSchema,
-    compactSlotV2TupleSchema,
-    compactSlotV2TupleSchema,
-    compactSlotV2TupleSchema,
-    compactSlotV2TupleSchema,
   ]),
 });
 
 type CompactSlotTuple = z.infer<typeof compactSlotTupleSchema>;
-type CompactSlotV2Tuple = z.infer<typeof compactSlotV2TupleSchema>;
 
 function isSpeciesOnlySimpleState(state: ShareableTeamState): boolean {
   if (state.mode !== 'free' || state.teamName || state.gameId || state.versionId) {
@@ -111,11 +85,8 @@ function isSpeciesOnlySimpleState(state: ShareableTeamState): boolean {
   });
 }
 
-function hasV2SlotFields(team: Team): boolean {
-  return team.some((slot) => Boolean(slot && (slot.gender !== undefined || slot.shiny)));
-}
-
-function toBaseSlotTuple(slot: TeamMember): NonNullable<CompactSlotTuple> {
+function toCompactTuple(slot: TeamSlot): CompactSlotTuple {
+  if (!slot) return null;
   return [
     slot.speciesSlug,
     slot.abilitySlug ?? null,
@@ -125,19 +96,13 @@ function toBaseSlotTuple(slot: TeamMember): NonNullable<CompactSlotTuple> {
     slot.teraType ?? null,
     slot.level ?? null,
     slot.nickname ?? null,
+    slot.gender ?? null,
+    slot.shiny ?? null,
   ];
 }
 
-function toCompactTuple(slot: TeamSlot): CompactSlotTuple {
-  return slot ? toBaseSlotTuple(slot) : null;
-}
-
-function toCompactV2Tuple(slot: TeamSlot): CompactSlotV2Tuple {
-  return slot ? [...toBaseSlotTuple(slot), slot.gender ?? null, slot.shiny ?? null] : null;
-}
-
 function fromCompactTuple(
-  tuple: CompactSlotTuple | CompactSlotV2Tuple,
+  tuple: CompactSlotTuple,
   generation: GenerationNumber,
   dex: DexGateway,
   warnings: string[],
@@ -173,7 +138,7 @@ function fromCompactTuple(
 }
 
 function mapTuplesToTeam(
-  tuples: readonly (CompactSlotTuple | CompactSlotV2Tuple)[],
+  tuples: readonly CompactSlotTuple[],
   generation: GenerationNumber,
   dex: DexGateway,
   warnings: string[],
@@ -188,20 +153,10 @@ function mapTuplesToTeam(
   ];
 }
 
-function buildPayloadBase(state: ShareableTeamState) {
-  return {
-    m: state.mode,
-    g: state.generation,
-    ...(state.gameId ? { gi: state.gameId } : {}),
-    ...(state.versionId ? { vi: state.versionId } : {}),
-    ...(state.teamName ? { tn: state.teamName } : {}),
-  };
-}
-
 /**
  * Encodes the active team state into compact URL search parameters.
  * Simple species-only Free Mode teams use human-readable `g` + `s` params;
- * configured builds or campaigns use a versioned `v1_` or `v2_` compressed payload.
+ * configured builds or campaigns use a compressed `p` payload.
  */
 export function encodeTeamToSearchParams(state: ShareableTeamState): TeamSearchParams {
   if (isSpeciesOnlySimpleState(state)) {
@@ -216,21 +171,17 @@ export function encodeTeamToSearchParams(state: ShareableTeamState): TeamSearchP
     };
   }
 
-  const useV2 = state.version === 2 || hasV2SlotFields(state.team);
-  const payload = useV2
-    ? ({
-        ...buildPayloadBase(state),
-        v: 2,
-        t: mapTeamSlots(state.team, toCompactV2Tuple),
-      } satisfies z.infer<typeof v2PayloadSchema>)
-    : ({
-        ...buildPayloadBase(state),
-        v: 1,
-        t: mapTeamSlots(state.team, toCompactTuple),
-      } satisfies z.infer<typeof v1PayloadSchema>);
+  const payload: z.infer<typeof teamPayloadSchema> = {
+    m: state.mode,
+    g: state.generation,
+    ...(state.gameId ? { gi: state.gameId } : {}),
+    ...(state.versionId ? { vi: state.versionId } : {}),
+    ...(state.teamName ? { tn: state.teamName } : {}),
+    t: mapTeamSlots(state.team, toCompactTuple),
+  };
 
   const compressed = compressToEncodedURIComponent(JSON.stringify(payload));
-  return { p: `v${payload.v}_${compressed}` };
+  return { p: compressed };
 }
 
 /**
@@ -243,14 +194,7 @@ export function decodeTeamFromSearchParams(
   const warnings: string[] = [];
 
   if (typeof params.p === 'string' && params.p.length > 0) {
-    const isV1 = params.p.startsWith('v1_');
-    const isV2 = params.p.startsWith('v2_');
-    if (!isV1 && !isV2) {
-      return { ok: false, error: 'Unsupported shared link version.' };
-    }
-
-    const compressed = params.p.slice(3);
-    const jsonString = decompressFromEncodedURIComponent(compressed);
+    const jsonString = decompressFromEncodedURIComponent(params.p);
     if (!jsonString) {
       return { ok: false, error: 'Shared team link is corrupted or incomplete.' };
     }
@@ -262,10 +206,7 @@ export function decodeTeamFromSearchParams(
       return { ok: false, error: 'Shared team payload contains invalid JSON.' };
     }
 
-    const validated = isV2
-      ? v2PayloadSchema.safeParse(parsedJson)
-      : v1PayloadSchema.safeParse(parsedJson);
-
+    const validated = teamPayloadSchema.safeParse(parsedJson);
     if (!validated.success) {
       return { ok: false, error: 'Shared team payload failed schema validation.' };
     }
@@ -275,7 +216,6 @@ export function decodeTeamFromSearchParams(
       ok: true,
       warnings,
       state: {
-        version: data.v,
         mode: data.m,
         generation: data.g,
         ...(data.gi ? { gameId: data.gi } : {}),
@@ -320,7 +260,6 @@ export function decodeTeamFromSearchParams(
     ok: true,
     warnings,
     state: {
-      version: 1,
       mode: 'free',
       generation,
       team,

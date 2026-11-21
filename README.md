@@ -13,7 +13,7 @@ A fast, intuitive, **100% client-side** Pokémon team planner designed to help p
 - **Generation-Accurate Mechanics**: Respects generation-specific rules (`Gen 1` vs. `Gen 2–5` vs. `Gen 6+` type charts, pre-Gen 4 Physical/Special split) and defensive interceptors from abilities (e.g., *Levitate*, *Thick Fat*, *Wonder Guard*, *Flash Fire*, *Sap Sipper*, *Earth Eater*) and items (*Air Balloon*).
 - **Explainable Recommendations**: Deterministic multi-criteria scoring for Pokémon, moves, abilities, and items — every suggestion explains *which* defensive weakness, offensive blind spot, or stat gap it addresses.
 - **Checkpoint-Based Journey Planner**: Dedicated campaign progression tree for mainline playthroughs, rooted in your starter choice and organized around checkpoints (Gyms, Elite Four, Champion) with `Capture`, `Train`, `Evolve`, `Replace`, and `Goal` steps.
-- **Zero Backend, Offline-Ready**: No accounts or remote database. Works offline as a PWA with local persistence in `IndexedDB`, compact shareable URLs (`v1_` / `v2_`), and Pokémon Showdown import/export.
+- **Zero Backend, Offline-Ready**: No accounts or remote database. Works offline as a PWA with local persistence in `IndexedDB`, compact shareable URLs, and Pokémon Showdown import/export.
 
 ## Current Status & Roadmap
 
@@ -23,7 +23,7 @@ A fast, intuitive, **100% client-side** Pokémon team planner designed to help p
 - **Team Analysis**: Defensive type effectiveness matrix, STAB vs. moveset offensive coverage, SVG base stat radar, and threat summaries.
 - **Smart Recommendations & Auto-Build**: Explainable suggestions and picker filters.
 - **Journey Planner**: Campaign manifest schemas, progression engine, and interactive journey UI for Gen 1–5 titles.
-- **Sharing & Persistence**: Versioned URL codecs, Showdown format import/export, `IndexedDB` storage, and offline PWA caching.
+- **Sharing & Persistence**: Compact URL codecs, Showdown format import/export, `IndexedDB` storage, and offline PWA caching.
 
 ### Planned / In Progress
 - Mainline campaign manifests beyond Generation 5.

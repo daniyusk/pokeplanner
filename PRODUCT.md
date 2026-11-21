@@ -36,7 +36,7 @@ Combines Richi3f Pokémon Team Planner's low-friction 6-slot visual clarity with
 - **Team Analysis**: Generation-accurate defensive type chart (factoring in abilities like Levitate, Thick Fat, Wonder Guard, Flash Fire, Sap Sipper, Earth Eater, and items like Air Balloon), dual offensive coverage (STAB vs. actual Moveset), base stat balance, and actionable threat summaries.
 - **Smart Recommendations**: Local deterministic multi-criteria scoring for Pokémon, moves, abilities, and items with structured human-readable reasons explaining every suggestion.
 - **Standalone Journey Planner**: Dedicated campaign progression tree available exclusively when a game is selected. Rooted in starter choice, divided into campaign checkpoints (Gyms, Elite Four, Champion), and supporting parallel/chained intermediate branches (`Capture`, `Train`, `Evolve`, `Replace`, `Goal`) down to the final team. Initial campaign scope covers mainline titles up to **Generation 5 (Black 2 & White 2)**.
-- **Team Sharing & Persistence**: Versioned compact shareable URLs (`v1_` and `v2_` supporting gender/shiny), Pokémon Showdown import/export, and local saved-team & journey-plan storage in `IndexedDB`.
+- **Team Sharing & Persistence**: Compact shareable URLs (supporting full builds, gender, and shiny), Pokémon Showdown import/export, and local saved-team & journey-plan storage in `IndexedDB`.
 
 ## Product Principles
 
