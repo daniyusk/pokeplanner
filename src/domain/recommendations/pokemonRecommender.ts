@@ -1,5 +1,12 @@
 import { analyzeTeam, type TeamAnalysisReport } from '@/domain/analysis';
-import { calculateDefensiveMultiplier, calculateTypeEffectiveness } from '@/domain/mechanics';
+import { BATTLE_GIMMICK, POKEMON_RECOMMENDER_WEIGHTS } from '@/domain/constants';
+import {
+  calculateDefensiveMultiplier,
+  calculateTypeEffectiveness,
+  doesAbilityMitigateAnyType,
+  evaluateAbilityDefensiveDelta,
+} from '@/domain/mechanics';
+import { withTeamSlot } from '@/domain/team';
 import type { DexGateway, GameContext, PokemonType, SpeciesData, Team } from '@/domain/types';
 import type { PokemonRecommendation, RecommendationReason, RecommendPokemonOptions } from './types';
 
@@ -17,20 +24,17 @@ function pickBestDefensiveAbility(
   for (const abilitySlug of species.abilities) {
     let mitigated = 0;
     for (const attackType of priorityWeakTypes) {
-      const base = calculateDefensiveMultiplier(
+      const delta = evaluateAbilityDefensiveDelta(
         attackType,
-        { types: species.types },
+        species.types,
+        abilitySlug,
         context,
         dex,
-      ).multiplier;
-      const withAbility = calculateDefensiveMultiplier(
-        attackType,
-        { types: species.types, abilitySlug },
-        context,
-        dex,
-      ).multiplier;
-      if (withAbility < base) {
-        mitigated += withAbility === 0 ? 2 : 1;
+      );
+      if (delta.mitigates) {
+        mitigated += delta.grantsImmunity
+          ? POKEMON_RECOMMENDER_WEIGHTS.abilityImmunityMitigationWeight
+          : POKEMON_RECOMMENDER_WEIGHTS.abilityResistMitigationWeight;
       }
     }
     if (mitigated > bestMitigated) {
@@ -49,6 +53,7 @@ function evaluateDefensiveScore(
   context: GameContext,
   dex: DexGateway,
 ): { score: number; reason?: RecommendationReason } {
+  const weights = POKEMON_RECOMMENDER_WEIGHTS.defense;
   let score = 0;
   const coveredCritical: PokemonType[] = [];
   const coveredWarning: PokemonType[] = [];
@@ -71,66 +76,56 @@ function evaluateDefensiveScore(
 
     if (mult === 0) {
       if (isCritical) {
-        score += 24;
+        score += weights.immuneCritical;
         coveredCritical.push(row.attackType);
       } else if (isWarning) {
-        score += 14;
+        score += weights.immuneWarning;
         coveredWarning.push(row.attackType);
       } else if (row.weakCount >= 1) {
-        score += 5;
+        score += weights.immuneMinor;
       }
     } else if (mult < 1) {
-      const resistBonus = mult <= 0.25 ? 1.3 : 1;
+      const resistBonus = mult <= 0.25 ? weights.quadResistMultiplier : 1;
       if (isCritical) {
-        score += 18 * resistBonus;
+        score += weights.resistCritical * resistBonus;
         coveredCritical.push(row.attackType);
       } else if (isWarning) {
-        score += 10 * resistBonus;
+        score += weights.resistWarning * resistBonus;
         coveredWarning.push(row.attackType);
       } else if (row.weakCount >= 1) {
-        score += 4;
+        score += weights.resistMinor;
       }
     } else if (mult >= 2) {
       if (isCritical || row.weakCount >= 2) {
-        score -= mult >= 4 ? 18 : 11;
+        score -= mult >= 4 ? weights.quadWeakPenalty : weights.doubleWeakPenalty;
         addedExposure += 1;
       }
     }
   }
 
+  const finalScore = score - addedExposure * weights.addedExposurePenalty;
   const allCovered = [...coveredCritical, ...coveredWarning];
   if (allCovered.length === 0) {
-    return { score };
+    return { score: finalScore };
   }
 
+  const abilityMitigates =
+    abilitySlug !== undefined &&
+    doesAbilityMitigateAnyType(allCovered, species.types, abilitySlug, context, dex);
+
   const abilityNote =
-    abilitySlug &&
-    allCovered.some((t) => {
-      const base = calculateDefensiveMultiplier(
-        t,
-        { types: species.types },
-        context,
-        dex,
-      ).multiplier;
-      const withAb = calculateDefensiveMultiplier(
-        t,
-        { types: species.types, abilitySlug },
-        context,
-        dex,
-      ).multiplier;
-      return withAb < base;
-    })
+    abilitySlug && abilityMitigates
       ? ` (with ${dex.getAbility(abilitySlug, context.generation)?.name ?? abilitySlug})`
       : '';
 
-  const targetList = allCovered.slice(0, 3);
+  const targetList = allCovered.slice(0, weights.maxSummaryTypes);
   const summary =
     coveredCritical.length > 0
       ? `Covers critical ${targetList.join(', ')} weakness${targetList.length > 1 ? 'es' : ''}${abilityNote}`
       : `Resists exposed ${targetList.join(', ')} attack${targetList.length > 1 ? 's' : ''}${abilityNote}`;
 
   return {
-    score: score - addedExposure * 2,
+    score: finalScore,
     reason: {
       category: 'defense',
       impact: coveredCritical.length > 0 ? 'high' : 'medium',
@@ -146,6 +141,7 @@ function evaluateOffensiveScore(
   context: GameContext,
   dex: DexGateway,
 ): { score: number; reason?: RecommendationReason } {
+  const weights = POKEMON_RECOMMENDER_WEIGHTS.offense;
   const blindSpots = report.offense.hasDamagingMoves
     ? report.offense.movesetBlindSpots
     : report.offense.stabBlindSpots;
@@ -168,9 +164,9 @@ function evaluateOffensiveScore(
     return { score: 0 };
   }
 
-  const pointsPerHit = blindSpots.length > 0 ? 9 : 2.5;
-  const score = Math.min(newlyCovered.length * pointsPerHit, 34);
-  const listed = newlyCovered.slice(0, 4);
+  const pointsPerHit = blindSpots.length > 0 ? weights.blindSpotPerHit : weights.generalPerHit;
+  const score = Math.min(newlyCovered.length * pointsPerHit, weights.maxScore);
+  const listed = newlyCovered.slice(0, weights.maxSummaryTypes);
 
   return {
     score,
@@ -194,33 +190,36 @@ function evaluateRoleScore(
     return { score: 0 };
   }
 
+  const weights = POKEMON_RECOMMENDER_WEIGHTS.role;
   const { atk, spa, spe, hp, def, spd } = species.baseStats;
   const roleNotes: string[] = [];
   let score = 0;
 
   const needsSpecial =
-    report.stats.biasSplit.specialAttackers === 0 && report.stats.biasSplit.physicalAttackers >= 2;
+    report.stats.biasSplit.specialAttackers === 0 &&
+    report.stats.biasSplit.physicalAttackers >= weights.minBiasAttackersForNeed;
   const needsPhysical =
-    report.stats.biasSplit.physicalAttackers === 0 && report.stats.biasSplit.specialAttackers >= 2;
+    report.stats.biasSplit.physicalAttackers === 0 &&
+    report.stats.biasSplit.specialAttackers >= weights.minBiasAttackersForNeed;
 
-  if (needsSpecial && spa >= 95 && spa >= atk) {
-    score += 14;
+  if (needsSpecial && spa >= weights.firepowerMinStat && spa >= atk) {
+    score += weights.firepowerBonus;
     roleNotes.push(`Special firepower (${spa} SpA)`);
-  } else if (needsPhysical && atk >= 95 && atk >= spa) {
-    score += 14;
+  } else if (needsPhysical && atk >= weights.firepowerMinStat && atk >= spa) {
+    score += weights.firepowerBonus;
     roleNotes.push(`Physical firepower (${atk} Atk)`);
   }
 
-  if (report.stats.peaks.spe < 95 && spe >= 100) {
-    score += 12;
+  if (report.stats.peaks.spe < weights.lowTeamSpeedPeak && spe >= weights.highCandidateSpeed) {
+    score += weights.speedBonus;
     roleNotes.push(`high Speed (${spe} Spe)`);
   }
 
   const avgBulk = (hp + def + spd) / 3;
   const teamBulk =
     (report.stats.averages.hp + report.stats.averages.def + report.stats.averages.spd) / 3;
-  if (teamBulk < 80 && avgBulk >= 95) {
-    score += 8;
+  if (teamBulk < weights.lowTeamBulkAvg && avgBulk >= weights.highCandidateBulkAvg) {
+    score += weights.bulkBonus;
     roleNotes.push('defensive bulk');
   }
 
@@ -232,18 +231,21 @@ function evaluateRoleScore(
     score,
     reason: {
       category: 'role',
-      impact: score >= 14 ? 'high' : 'medium',
+      impact: score >= weights.highImpactThreshold ? 'high' : 'medium',
       summary: `Balances team stats with ${roleNotes.join(' and ')}`,
     },
   };
 }
 
 function computeEffectiveBstScore(species: SpeciesData): number {
+  const { secondaryOffenseWeight, bstBaseline, bstDivisor, maxBstScore } =
+    POKEMON_RECOMMENDER_WEIGHTS.viability;
   const { hp, atk, def, spa, spd, spe } = species.baseStats;
   const primaryOffense = Math.max(atk, spa);
   const secondaryOffense = Math.min(atk, spa);
-  const effectiveBst = hp + primaryOffense + secondaryOffense * 0.35 + def + spd + spe;
-  return Math.min(Math.max((effectiveBst - 340) / 14, 0), 16);
+  const effectiveBst =
+    hp + primaryOffense + secondaryOffense * secondaryOffenseWeight + def + spd + spe;
+  return Math.min(Math.max((effectiveBst - bstBaseline) / bstDivisor, 0), maxBstScore);
 }
 
 /**
@@ -258,19 +260,17 @@ export function recommendPokemonForTeam(
   options: RecommendPokemonOptions = {},
 ): PokemonRecommendation[] {
   const {
-    limit = 12,
+    limit = POKEMON_RECOMMENDER_WEIGHTS.defaultLimit,
     excludeNfe = true,
     excludeLegendaries = false,
-    allowMegas = context.mechanics.gimmick === 'mega',
+    allowMegas = context.mechanics.gimmick === BATTLE_GIMMICK.Mega,
     replaceSlotIndex,
     allowedSpeciesSlugs,
   } = options;
 
   // When replacing a specific slot, evaluate the team without that slot
-  const baselineTeam = [...team] as Team;
-  if (replaceSlotIndex !== undefined) {
-    baselineTeam[replaceSlotIndex] = null;
-  }
+  const baselineTeam =
+    replaceSlotIndex !== undefined ? withTeamSlot(team, replaceSlotIndex, null) : team;
 
   const report = analyzeTeam(baselineTeam, context, dex);
   const existingBaseSlugs = new Set<string>();
@@ -280,10 +280,9 @@ export function recommendPokemonForTeam(
     if (sp) existingBaseSlugs.add(sp.baseSpeciesSlug);
   }
 
-  const priorityWeakTypes = [
-    ...report.defense.criticalWeaknesses,
-    ...report.defense.uncoveredWeaknesses,
-  ];
+  const priorityWeakTypes = Array.from(
+    new Set([...report.defense.criticalWeaknesses, ...report.defense.uncoveredWeaknesses]),
+  );
 
   const candidates = dex.listSpecies(context.generation);
   const scored: PokemonRecommendation[] = [];
@@ -326,8 +325,13 @@ export function recommendPokemonForTeam(
       });
     }
 
+    const { topSynergy, strongFit } = POKEMON_RECOMMENDER_WEIGHTS.fitThresholds;
     const fitLabel: PokemonRecommendation['fitLabel'] =
-      totalScore >= 38 ? 'Top Synergy' : totalScore >= 24 ? 'Strong Fit' : 'Balanced Pick';
+      totalScore >= topSynergy
+        ? 'Top Synergy'
+        : totalScore >= strongFit
+          ? 'Strong Fit'
+          : 'Balanced Pick';
 
     scored.push({
       species,
