@@ -3,8 +3,12 @@ import { useState } from 'react';
 import { PokemonSprite } from '@/components/pokemon/PokemonSprite';
 import { TypeBadge } from '@/components/pokemon/TypeBadge';
 import { pkmnDexGateway } from '@/data/dex/pkmnDexGateway';
-import type { DefensiveProfile, SlotDefensiveCell } from '@/domain/analysis';
-import type { GameContext, Team, TeamSlotIndex } from '@/domain/types';
+import {
+  type DefensiveProfile,
+  resolveTeamEntries,
+  type SlotDefensiveCell,
+} from '@/domain/analysis';
+import type { GameContext, Team } from '@/domain/types';
 
 interface DefensiveMatrixProps {
   defense: DefensiveProfile;
@@ -35,6 +39,9 @@ function getCellStyle(multiplier: number): string {
   }
   if (multiplier >= 2) {
     return 'border-amber-500/50 bg-amber-500/15 text-amber-800 dark:text-amber-300 font-semibold';
+  }
+  if (multiplier > 1) {
+    return 'border-amber-500/35 bg-amber-500/8 text-amber-700 dark:text-amber-300 font-medium';
   }
   return 'border-transparent text-[var(--ink-muted)]/45';
 }
@@ -69,15 +76,7 @@ function MultiplierBadge({
 export function DefensiveMatrix({ defense, team, context }: DefensiveMatrixProps) {
   const [onlyNotable, setOnlyNotable] = useState(false);
 
-  const activeSlots = ([0, 1, 2, 3, 4, 5] as const)
-    .map((slotIndex) => {
-      const member = team[slotIndex];
-      if (!member) return null;
-      const species = pkmnDexGateway.getSpecies(member.speciesSlug, context.generation);
-      if (!species) return null;
-      return { slotIndex: slotIndex as TeamSlotIndex, member, species };
-    })
-    .filter((item): item is NonNullable<typeof item> => item !== null);
+  const activeSlots = resolveTeamEntries(team, context.generation, pkmnDexGateway);
 
   const visibleRows = onlyNotable
     ? defense.rows.filter((r) => r.weakCount > 0 || r.resistCount > 0 || r.immuneCount > 0)
@@ -121,8 +120,7 @@ export function DefensiveMatrix({ defense, team, context }: DefensiveMatrixProps
                       spriteId={slot.species.spriteId}
                       dexNumber={slot.species.dexNumber}
                       name={slot.species.name}
-                      size="sm"
-                      className="h-8 w-8"
+                      size="xs"
                     />
                     <span className="max-w-[5.5rem] truncate text-[11px]">{slot.species.name}</span>
                   </div>

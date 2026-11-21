@@ -1,42 +1,35 @@
-import type { StatId, StatsTable } from '@/domain/types';
+import type { StatsTable } from '@/domain/types';
+import { MAX_BASE_STAT_SCALE, STAT_RADAR_AXES, STAT_RADAR_RINGS } from './statDisplayConfig';
 
 interface StatRadarChartProps {
   averages: StatsTable;
   peaks: StatsTable;
 }
 
-const AXES: readonly { key: StatId; label: string }[] = [
-  { key: 'hp', label: 'HP' },
-  { key: 'atk', label: 'Atk' },
-  { key: 'def', label: 'Def' },
-  { key: 'spe', label: 'Spe' },
-  { key: 'spd', label: 'SpD' },
-  { key: 'spa', label: 'SpA' },
-];
-
-const MAX_STAT_SCALE = 150;
 const CENTER = 120;
 const RADIUS = 82;
+const LABEL_OFFSET = 18;
 
-function polarToCartesian(index: number, value: number): { x: number; y: number } {
-  const angle = (Math.PI * 2 * index) / AXES.length - Math.PI / 2;
-  const clamped = Math.min(value, MAX_STAT_SCALE) / MAX_STAT_SCALE;
+function polarToCartesian(index: number, radius: number): { x: number; y: number } {
+  const angle = (Math.PI * 2 * index) / STAT_RADAR_AXES.length - Math.PI / 2;
   return {
-    x: CENTER + Math.cos(angle) * RADIUS * clamped,
-    y: CENTER + Math.sin(angle) * RADIUS * clamped,
+    x: CENTER + Math.cos(angle) * radius,
+    y: CENTER + Math.sin(angle) * radius,
   };
 }
 
+function statToRadius(value: number): number {
+  return (Math.min(value, MAX_BASE_STAT_SCALE) / MAX_BASE_STAT_SCALE) * RADIUS;
+}
+
 function buildPolygonPoints(stats: StatsTable): string {
-  return AXES.map((axis, idx) => {
-    const pt = polarToCartesian(idx, stats[axis.key]);
+  return STAT_RADAR_AXES.map((axis, idx) => {
+    const pt = polarToCartesian(idx, statToRadius(stats[axis.key]));
     return `${pt.x.toFixed(1)},${pt.y.toFixed(1)}`;
   }).join(' ');
 }
 
 export function StatRadarChart({ averages, peaks }: StatRadarChartProps) {
-  const rings = [50, 100, 150] as const;
-
   return (
     <div className="flex flex-col items-center">
       <svg
@@ -48,9 +41,9 @@ export function StatRadarChart({ averages, peaks }: StatRadarChartProps) {
         <title>Team Base Stat Radar</title>
 
         {/* Reference Rings */}
-        {rings.map((ring) => {
-          const pts = AXES.map((_, idx) => {
-            const pt = polarToCartesian(idx, ring);
+        {STAT_RADAR_RINGS.map((ring) => {
+          const pts = STAT_RADAR_AXES.map((_, idx) => {
+            const pt = polarToCartesian(idx, statToRadius(ring));
             return `${pt.x.toFixed(1)},${pt.y.toFixed(1)}`;
           }).join(' ');
           return (
@@ -65,9 +58,9 @@ export function StatRadarChart({ averages, peaks }: StatRadarChartProps) {
         })}
 
         {/* Axis Spokes */}
-        {AXES.map((axis, idx) => {
-          const outer = polarToCartesian(idx, MAX_STAT_SCALE);
-          const labelPos = polarToCartesian(idx, MAX_STAT_SCALE + 26);
+        {STAT_RADAR_AXES.map((axis, idx) => {
+          const outer = polarToCartesian(idx, RADIUS);
+          const labelPos = polarToCartesian(idx, RADIUS + LABEL_OFFSET);
           return (
             <g key={axis.key}>
               <line
@@ -85,7 +78,7 @@ export function StatRadarChart({ averages, peaks }: StatRadarChartProps) {
                 dominantBaseline="central"
                 className="fill-[var(--ink-secondary)] text-[11px] font-semibold"
               >
-                {axis.label}
+                {axis.shortLabel}
               </text>
             </g>
           );
@@ -119,7 +112,7 @@ export function StatRadarChart({ averages, peaks }: StatRadarChartProps) {
             className="h-0.5 w-3 border-t-2 border-dashed border-[var(--ink-muted)]"
             aria-hidden="true"
           />
-          <span>Team Peak (150 scale)</span>
+          <span>Team Peak ({MAX_BASE_STAT_SCALE} scale)</span>
         </span>
       </div>
     </div>

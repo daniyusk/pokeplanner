@@ -32,5 +32,28 @@ describe('TeamAnalysisSection UI Integration', () => {
     // Switch to Stats & Roles tab
     fireEvent.click(screen.getByRole('tab', { name: /Stats & Roles/i }));
     expect(screen.getByText(/Average BST:/i)).toBeInTheDocument();
+
+    // Radar chart axis labels must be placed outside the outer polygon spokes, not clamped onto vertices
+    const radar = screen.getByRole('img', { name: /Team base stat radar chart/i });
+    const hpLabel = screen.getByText('HP', { selector: 'text' });
+    const speLabel = screen.getByText('Spe', { selector: 'text' });
+    const spokeLines = Array.from(radar.querySelectorAll('line'));
+    const spokeYValues = spokeLines.map((line) => Number(line.getAttribute('y2')));
+    const minSpokeY = Math.min(...spokeYValues);
+    const maxSpokeY = Math.max(...spokeYValues);
+
+    expect(Number(hpLabel.getAttribute('y'))).toBeLessThan(minSpokeY);
+    expect(Number(speLabel.getAttribute('y'))).toBeGreaterThan(maxSpokeY);
+  });
+
+  it('displays fractional 1.25x weaknesses as threats in DefensiveMatrix', () => {
+    const store = useTeamStore.getState();
+    store.setSlotSpecies(0, 'toxicroak');
+    store.updateSlotMember(0, { abilitySlug: 'dryskin' });
+
+    render(<TeamAnalysisSection />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Filter: Threats & Resists/i }));
+    expect(screen.getByText('1.25×')).toBeInTheDocument();
   });
 });

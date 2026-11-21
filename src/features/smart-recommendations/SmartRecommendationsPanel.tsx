@@ -3,12 +3,14 @@ import { useMemo, useState } from 'react';
 import { PokemonSprite } from '@/components/pokemon/PokemonSprite';
 import { TypeBadge } from '@/components/pokemon/TypeBadge';
 import { pkmnDexGateway } from '@/data/dex/pkmnDexGateway';
+import { BATTLE_GIMMICK, TEAM_SLOT_INDICES } from '@/domain/constants';
 import {
   type PokemonRecommendation,
   type RecommendationReason,
   recommendPokemonForTeam,
 } from '@/domain/recommendations';
 import type { TeamSlotIndex } from '@/domain/types';
+import { useTransientValue } from '@/hooks/useTransientFlag';
 import { useTeamStore } from '@/stores/useTeamStore';
 
 function ReasonIcon({ category }: { category: RecommendationReason['category'] }) {
@@ -48,9 +50,9 @@ export function SmartRecommendationsPanel({ allowedSpeciesSlugs }: SmartRecommen
 
   const [excludeLegendaries, setExcludeLegendaries] = useState(true);
   const [excludeNfe, setExcludeNfe] = useState(true);
-  const [allowMegas, setAllowMegas] = useState(context.mechanics.gimmick === 'mega');
+  const [allowMegas, setAllowMegas] = useState(context.mechanics.gimmick === BATTLE_GIMMICK.Mega);
   const [replaceSlot, setReplaceSlot] = useState<TeamSlotIndex | 'empty'>('empty');
-  const [appliedSlug, setAppliedSlug] = useState<string | null>(null);
+  const [appliedSlug, triggerAppliedSlug] = useTransientValue<string>(1500);
 
   const firstEmptyIndex = team.indexOf(null);
   const hasEmptySlot = firstEmptyIndex >= 0;
@@ -87,14 +89,13 @@ export function SmartRecommendationsPanel({ allowedSpeciesSlugs }: SmartRecommen
     if (rec.recommendedAbilitySlug && context.mechanics.hasAbilities) {
       updateSlotMember(effectiveTargetSlot, { abilitySlug: rec.recommendedAbilitySlug });
     }
-    setAppliedSlug(rec.species.slug);
-    setTimeout(() => setAppliedSlug(null), 1500);
+    triggerAppliedSlug(rec.species.slug);
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 rounded-2xl bg-[var(--surface-card)] p-5">
       {/* Controls Strip */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-3.5">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[var(--surface-elevated)] p-3">
         <div className="flex flex-wrap items-center gap-2">
           <label
             htmlFor="rec-target-slot"
@@ -114,7 +115,7 @@ export function SmartRecommendationsPanel({ allowedSpeciesSlugs }: SmartRecommen
             {hasEmptySlot && (
               <option value="empty">Next Open Slot (Slot {firstEmptyIndex + 1})</option>
             )}
-            {([0, 1, 2, 3, 4, 5] as const).map((idx) => {
+            {TEAM_SLOT_INDICES.map((idx) => {
               const slotMember = team[idx];
               const sp = slotMember
                 ? pkmnDexGateway.getSpecies(slotMember.speciesSlug, context.generation)
@@ -147,7 +148,7 @@ export function SmartRecommendationsPanel({ allowedSpeciesSlugs }: SmartRecommen
             />
             <span>Fully Evolved Only</span>
           </label>
-          {context.mechanics.gimmick === 'mega' && (
+          {context.mechanics.gimmick === BATTLE_GIMMICK.Mega && (
             <label className="inline-flex cursor-pointer items-center gap-1.5 text-[var(--ink-secondary)]">
               <input
                 type="checkbox"
@@ -186,7 +187,7 @@ export function SmartRecommendationsPanel({ allowedSpeciesSlugs }: SmartRecommen
             return (
               <article
                 key={rec.species.slug}
-                className="flex flex-col justify-between gap-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-[var(--shadow-card)]"
+                className="flex flex-col justify-between gap-3 rounded-xl bg-[var(--surface-elevated)] p-4"
               >
                 <div className="space-y-3">
                   {/* Card Header */}
@@ -196,7 +197,7 @@ export function SmartRecommendationsPanel({ allowedSpeciesSlugs }: SmartRecommen
                         spriteId={rec.species.spriteId}
                         dexNumber={rec.species.dexNumber}
                         name={rec.species.name}
-                        size="sm"
+                        size="custom"
                         className="h-12 w-12"
                       />
                       <div>
@@ -222,7 +223,7 @@ export function SmartRecommendationsPanel({ allowedSpeciesSlugs }: SmartRecommen
                   {/* Recommended Ability + Stats Snapshot */}
                   <div className="flex flex-wrap items-center gap-2 text-[11px] text-[var(--ink-muted)]">
                     {abilityName && (
-                      <span className="rounded bg-[var(--surface-elevated)] px-2 py-0.5 font-medium text-[var(--ink-secondary)]">
+                      <span className="rounded bg-[var(--surface-card)] px-2 py-0.5 font-medium text-[var(--ink-secondary)]">
                         Ability: {abilityName}
                       </span>
                     )}

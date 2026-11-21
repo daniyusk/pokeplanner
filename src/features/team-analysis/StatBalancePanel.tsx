@@ -1,19 +1,10 @@
 import type { TeamStatProfile } from '@/domain/analysis';
-import type { StatId } from '@/domain/types';
 import { StatRadarChart } from './StatRadarChart';
+import { MAX_BASE_STAT_SCALE, STAT_BAR_ROWS } from './statDisplayConfig';
 
 interface StatBalancePanelProps {
   stats: TeamStatProfile;
 }
-
-const STAT_ROWS: readonly { key: StatId; label: string }[] = [
-  { key: 'hp', label: 'HP' },
-  { key: 'atk', label: 'Attack' },
-  { key: 'def', label: 'Defense' },
-  { key: 'spa', label: 'Sp. Atk' },
-  { key: 'spd', label: 'Sp. Def' },
-  { key: 'spe', label: 'Speed' },
-];
 
 export function StatBalancePanel({ stats }: StatBalancePanelProps) {
   const totalMoves = stats.moveSplit.physical + stats.moveSplit.special + stats.moveSplit.status;
@@ -31,11 +22,11 @@ export function StatBalancePanel({ stats }: StatBalancePanelProps) {
       {/* Right: Stat Bars & Split */}
       <div className="space-y-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 lg:col-span-7">
         <div className="space-y-2.5">
-          {STAT_ROWS.map((row) => {
+          {STAT_BAR_ROWS.map((row) => {
             const avg = stats.averages[row.key];
             const peak = stats.peaks[row.key];
-            const avgPct = Math.min((avg / 150) * 100, 100);
-            const peakPct = Math.min((peak / 150) * 100, 100);
+            const avgPct = Math.min((avg / MAX_BASE_STAT_SCALE) * 100, 100);
+            const peakPct = Math.min((peak / MAX_BASE_STAT_SCALE) * 100, 100);
 
             return (
               <div key={row.key} className="grid grid-cols-[4.5rem_1fr_5.5rem] items-center gap-3">
