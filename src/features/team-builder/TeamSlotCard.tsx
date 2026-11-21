@@ -1,49 +1,132 @@
-import { ArrowLeft, ArrowRight, Plus, SlidersHorizontal, X } from 'lucide-react';
+import { useDraggable, useDroppable } from '@dnd-kit/core';
+import { SlidersHorizontal, Sparkles, X } from 'lucide-react';
 import { PokemonSprite } from '@/components/pokemon/PokemonSprite';
 import { TypeBadge } from '@/components/pokemon/TypeBadge';
 import { TYPE_COLOR_VARS } from '@/components/pokemon/TypeIcon';
 import { pkmnDexGateway } from '@/data/dex/pkmnDexGateway';
-import type { GameContext, TeamMember, TeamSlotIndex } from '@/domain/types';
+import { resolveGenderFormeTarget } from '@/domain/team';
+import type { GameContext, PokemonGender, TeamMember, TeamSlotIndex } from '@/domain/types';
 
 interface TeamSlotCardProps {
   slotIndex: TeamSlotIndex;
   member: TeamMember | null;
   context: GameContext;
-  onAdd: () => void;
+  onFocusBrowser: () => void;
+  onToggleGender: () => void;
+  onToggleShiny: () => void;
   onEdit: () => void;
   onRemove: () => void;
-  onSwapLeft?: () => void;
-  onSwapRight?: () => void;
+}
+
+function GenderGlyph({ gender }: { gender: PokemonGender }) {
+  if (gender === 'M') {
+    return (
+      <svg
+        viewBox="0 0 16 16"
+        className="h-3.5 w-3.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <circle cx="6.5" cy="9.5" r="3.5" />
+        <path d="M9.2 6.8 13.5 2.5M10 2.5h3.5V6" />
+      </svg>
+    );
+  }
+  if (gender === 'F') {
+    return (
+      <svg
+        viewBox="0 0 16 16"
+        className="h-3.5 w-3.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <circle cx="8" cy="6" r="3.5" />
+        <path d="M8 9.5V14.5M5.75 12.25h4.5" />
+      </svg>
+    );
+  }
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      className="h-3.5 w-3.5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      <path d="M4.5 8h7" />
+    </svg>
+  );
+}
+
+function canSwitchGender(
+  availableGenders: readonly PokemonGender[],
+  species: NonNullable<ReturnType<typeof pkmnDexGateway.getSpecies>>,
+  generation: GameContext['generation'],
+): boolean {
+  if (availableGenders.length > 1) return true;
+  return Boolean(resolveGenderFormeTarget(species, generation, pkmnDexGateway));
 }
 
 export function TeamSlotCard({
   slotIndex,
   member,
   context,
-  onAdd,
+  onFocusBrowser,
+  onToggleGender,
+  onToggleShiny,
   onEdit,
   onRemove,
-  onSwapLeft,
-  onSwapRight,
 }: TeamSlotCardProps) {
+  const slotId = `slot-${slotIndex}`;
+  const { setNodeRef: setDropRef, isOver } = useDroppable({ id: slotId });
+  const {
+    attributes,
+    listeners,
+    setNodeRef: setDragRef,
+    isDragging,
+  } = useDraggable({
+    id: slotId,
+    disabled: !member,
+  });
+
   if (!member) {
     return (
-      <button
-        type="button"
-        onClick={onAdd}
-        className="group relative flex min-h-[250px] flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-[var(--border-strong)] bg-[var(--surface-card)]/60 p-4 text-center transition hover:border-[var(--accent-primary)] hover:bg-[var(--surface-card)]"
+      <div
+        ref={setDropRef}
+        className={`flex flex-col items-center justify-center rounded-2xl py-3 transition ${
+          isOver ? 'bg-[var(--surface-elevated)] ring-2 ring-[var(--accent-primary)]/40' : ''
+        }`}
       >
-        <span className="absolute top-2.5 left-2.5 rounded-md border border-[var(--border-subtle)] bg-[var(--surface-elevated)] px-1.5 py-0.5 text-[11px] font-semibold tabular-nums text-[var(--ink-muted)]">
-          {slotIndex + 1}
-        </span>
-        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--surface-muted)] text-[var(--ink-secondary)] transition group-hover:bg-[var(--accent-primary)] group-hover:text-[var(--accent-ink)]">
-          <Plus className="h-5 w-5" />
-        </span>
-        <div>
-          <p className="text-sm font-semibold text-[var(--ink-primary)]">Add Pokémon</p>
-          <p className="mt-0.5 text-xs text-[var(--ink-muted)]">Click or press {slotIndex + 1}</p>
-        </div>
-      </button>
+        <button
+          type="button"
+          onClick={onFocusBrowser}
+          aria-label="Empty team slot"
+          className="flex h-24 w-24 items-center justify-center rounded-full bg-[var(--surface-elevated)] text-[var(--ink-muted)]/50 transition hover:bg-[var(--surface-muted)] hover:text-[var(--ink-secondary)]"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            className="h-8 w-8 opacity-45"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="9" />
+            <path d="M3 12h6.2m5.6 0H21" />
+            <circle cx="12" cy="12" r="2.5" />
+          </svg>
+        </button>
+      </div>
     );
   }
 
@@ -51,157 +134,130 @@ export function TeamSlotCard({
   if (!species) return null;
 
   const primaryTypeColor = TYPE_COLOR_VARS[species.types[0]];
-  const abilityName =
-    context.mechanics.hasAbilities && member.abilitySlug
-      ? pkmnDexGateway.getAbility(member.abilitySlug, context.generation)?.name
-      : undefined;
-  const itemName =
-    context.mechanics.hasHeldItems && member.itemSlug
-      ? pkmnDexGateway.getItem(member.itemSlug, context.generation)?.name
-      : undefined;
+  const currentGender: PokemonGender =
+    member.gender && species.availableGenders.includes(member.gender)
+      ? member.gender
+      : (species.availableGenders[0] ?? 'N');
+  const genderToggleable = canSwitchGender(species.availableGenders, species, context.generation);
+
+  const isShiny = Boolean(member.shiny);
+  const hasCustomBuild =
+    member.moveSlugs.length > 0 || Boolean(member.itemSlug) || Boolean(member.natureId);
+
+  const genderLabel =
+    currentGender === 'M'
+      ? `Gender: Male (${species.name})`
+      : currentGender === 'F'
+        ? `Gender: Female (${species.name})`
+        : `Genderless (${species.name})`;
+
+  const genderColorClass =
+    currentGender === 'M'
+      ? 'text-sky-600 dark:text-sky-400'
+      : currentGender === 'F'
+        ? 'text-rose-500 dark:text-rose-400'
+        : 'text-[var(--ink-muted)]';
 
   return (
     <article
-      className="relative flex min-h-[250px] flex-col justify-between overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-3 shadow-[var(--shadow-card)] transition hover:border-[var(--border-strong)]"
-      style={{
-        backgroundImage: `radial-gradient(circle at 50% 18%, color-mix(in srgb, ${primaryTypeColor} 14%, transparent), transparent 68%)`,
-      }}
+      ref={setDropRef}
+      className={`group relative flex flex-col items-center rounded-2xl py-2 text-center transition ${
+        isOver ? 'bg-[var(--surface-elevated)] ring-2 ring-[var(--accent-primary)]/40' : ''
+      } ${isDragging ? 'opacity-35' : ''}`}
     >
-      {/* Top Action Row */}
-      <div className="flex items-center justify-between gap-1">
-        <span className="text-[11px] font-semibold tabular-nums text-[var(--ink-muted)]">
-          #{String(species.dexNumber).padStart(4, '0')}
-        </span>
-        <div className="flex items-center gap-0.5">
-          {onSwapLeft && (
-            <button
-              type="button"
-              onClick={onSwapLeft}
-              aria-label={`Move ${species.name} left`}
-              title="Move left"
-              className="rounded p-1 text-[var(--ink-muted)] transition hover:bg-[var(--surface-muted)] hover:text-[var(--ink-primary)]"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-            </button>
-          )}
-          {onSwapRight && (
-            <button
-              type="button"
-              onClick={onSwapRight}
-              aria-label={`Move ${species.name} right`}
-              title="Move right"
-              className="rounded p-1 text-[var(--ink-muted)] transition hover:bg-[var(--surface-muted)] hover:text-[var(--ink-primary)]"
-            >
-              <ArrowRight className="h-3.5 w-3.5" />
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={onRemove}
-            aria-label={`Remove ${species.name} from slot ${slotIndex + 1}`}
-            title="Remove Pokémon"
-            className="rounded p-1 text-[var(--ink-muted)] transition hover:bg-red-500/15 hover:text-red-500"
-          >
-            <X className="h-3.5 w-3.5" />
-          </button>
-        </div>
+      {/* Pokémon Image with clean circular type backdrop & hover remove */}
+      <div className="relative flex items-center justify-center">
+        <button
+          type="button"
+          onClick={onRemove}
+          aria-label={`Remove ${species.name}`}
+          title={`Remove ${species.name}`}
+          className="absolute -top-1 -right-1 z-10 inline-flex h-6 w-6 items-center justify-center rounded-full bg-[var(--surface-card)] text-[var(--ink-muted)] opacity-0 transition group-focus-within:opacity-100 group-hover:opacity-100 hover:text-red-500 focus-visible:opacity-100"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+
+        <button
+          ref={setDragRef}
+          type="button"
+          onClick={onEdit}
+          aria-label={species.name}
+          {...attributes}
+          {...listeners}
+          className="flex h-24 w-24 cursor-grab touch-none items-center justify-center rounded-full transition-transform duration-150 select-none hover:scale-105 active:cursor-grabbing"
+          style={{
+            backgroundColor: `color-mix(in srgb, ${primaryTypeColor} 15%, var(--surface-elevated))`,
+          }}
+        >
+          <PokemonSprite
+            spriteId={species.spriteId}
+            dexNumber={species.dexNumber}
+            name={species.name}
+            size="lg"
+            shiny={isShiny}
+            gender={currentGender}
+          />
+        </button>
       </div>
 
-      {/* Sprite & Identity */}
-      <button
-        type="button"
-        onClick={onAdd}
-        title={`Change ${species.name}`}
-        className="group my-1 flex flex-col items-center text-center focus-visible:rounded-lg"
-      >
-        <PokemonSprite
-          spriteId={species.spriteId}
-          dexNumber={species.dexNumber}
-          name={species.name}
-          size="md"
-          className="transition-transform duration-200 group-hover:scale-105"
-        />
-        <span className="mt-1 line-clamp-1 text-sm font-bold tracking-tight text-[var(--ink-primary)]">
-          {member.nickname ? member.nickname : species.name}
-        </span>
-        {member.nickname && (
-          <span className="text-[11px] text-[var(--ink-muted)]">{species.name}</span>
-        )}
-      </button>
+      {/* Discreet Species Name */}
+      <p className="mt-2 max-w-[9rem] truncate text-xs font-semibold text-[var(--ink-primary)]">
+        {member.nickname || species.name}
+      </p>
 
-      {/* Type Badges */}
+      {/* Accessible Types */}
       <div className="mt-1.5 flex flex-wrap items-center justify-center gap-1">
         {species.types.map((t) => (
           <TypeBadge key={t} type={t} size="sm" />
         ))}
       </div>
 
-      {/* Build Preview / Configure Trigger */}
-      <button
-        type="button"
-        onClick={onEdit}
-        className="mt-3 flex w-full flex-col gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-elevated)] p-2 text-left transition hover:border-[var(--border-strong)] hover:bg-[var(--surface-muted)]"
-      >
-        <div className="flex items-center justify-between gap-1 text-[11px] font-medium text-[var(--ink-secondary)]">
-          <span className="truncate">
-            {abilityName ?? (context.mechanics.hasAbilities ? 'Select ability' : species.name)}
-          </span>
-          <SlidersHorizontal className="h-3 w-3 shrink-0 text-[var(--ink-muted)]" />
-        </div>
+      {/* 3 Core Slot Actions: Gender · Shiny · Adjust */}
+      <div className="mt-2 flex items-center justify-center gap-1">
+        <button
+          type="button"
+          onClick={onToggleGender}
+          disabled={!genderToggleable}
+          aria-label={genderLabel}
+          title={genderToggleable ? `${genderLabel} — Click to switch` : genderLabel}
+          className={`inline-flex h-7 w-7 items-center justify-center rounded-full bg-[var(--surface-elevated)] transition ${genderColorClass} ${
+            genderToggleable ? 'hover:bg-[var(--surface-muted)]' : 'cursor-default opacity-45'
+          }`}
+        >
+          <GenderGlyph gender={currentGender} />
+        </button>
 
-        {(itemName || member.natureId || member.teraType) && (
-          <div className="flex flex-wrap gap-1 text-[10px] text-[var(--ink-muted)]">
-            {itemName && (
-              <span className="rounded bg-[var(--surface-card)] px-1.5 py-0.5 font-medium text-[var(--ink-secondary)]">
-                @ {itemName}
-              </span>
-            )}
-            {member.natureId && (
-              <span className="rounded bg-[var(--surface-card)] px-1.5 py-0.5 font-medium">
-                {member.natureId}
-              </span>
-            )}
-            {context.mechanics.gimmick === 'terastal' && member.teraType && (
-              <span className="rounded bg-[var(--surface-card)] px-1.5 py-0.5 font-medium">
-                Tera {member.teraType}
-              </span>
-            )}
-          </div>
-        )}
+        <button
+          type="button"
+          onClick={onToggleShiny}
+          aria-pressed={isShiny}
+          aria-label={`Toggle shiny ${species.name}`}
+          title={isShiny ? 'Shiny enabled' : 'Shiny disabled'}
+          className={`inline-flex h-7 w-7 items-center justify-center rounded-full transition ${
+            isShiny
+              ? 'bg-amber-500/18 text-amber-600 dark:text-amber-300'
+              : 'bg-[var(--surface-elevated)] text-[var(--ink-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--ink-primary)]'
+          }`}
+        >
+          <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+        </button>
 
-        <div className="grid grid-cols-2 gap-1 pt-0.5">
-          {[0, 1, 2, 3].map((moveSlot) => {
-            const moveSlug = member.moveSlugs[moveSlot];
-            const move = moveSlug
-              ? pkmnDexGateway.getMove(moveSlug, context.generation)
-              : undefined;
-            if (!move) {
-              return (
-                <span
-                  key={moveSlot}
-                  className="truncate rounded bg-[var(--surface-card)]/60 px-1.5 py-0.5 text-[10px] text-[var(--ink-muted)]"
-                >
-                  —
-                </span>
-              );
-            }
-            return (
-              <span
-                key={moveSlot}
-                className="flex items-center gap-1 truncate rounded bg-[var(--surface-card)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--ink-primary)]"
-                title={move.name}
-              >
-                <span
-                  className="h-1.5 w-1.5 shrink-0 rounded-full"
-                  style={{ backgroundColor: TYPE_COLOR_VARS[move.type] }}
-                  aria-hidden="true"
-                />
-                <span className="truncate">{move.name}</span>
-              </span>
-            );
-          })}
-        </div>
-      </button>
+        <button
+          type="button"
+          onClick={onEdit}
+          aria-label={`Adjust ${species.name}`}
+          title={`Adjust ${species.name}`}
+          className="relative inline-flex h-7 w-7 items-center justify-center rounded-full bg-[var(--surface-elevated)] text-[var(--ink-secondary)] transition hover:bg-[var(--surface-muted)] hover:text-[var(--ink-primary)]"
+        >
+          <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
+          {hasCustomBuild && (
+            <span
+              className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-[var(--accent-primary)]"
+              aria-hidden="true"
+            />
+          )}
+        </button>
+      </div>
     </article>
   );
 }

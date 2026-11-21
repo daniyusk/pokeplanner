@@ -1,66 +1,118 @@
+import {
+  DndContext,
+  type DragEndEvent,
+  DragOverlay,
+  type DragStartEvent,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import { useState } from 'react';
+import { PokemonSprite } from '@/components/pokemon/PokemonSprite';
+import { TYPE_COLOR_VARS } from '@/components/pokemon/TypeIcon';
+import { pkmnDexGateway } from '@/data/dex/pkmnDexGateway';
+import { TEAM_SLOT_INDICES } from '@/domain/constants';
 import type { TeamSlotIndex } from '@/domain/types';
 import { useTeamStore } from '@/stores/useTeamStore';
 import { TeamSlotCard } from './TeamSlotCard';
 
-const SLOT_INDICES: readonly TeamSlotIndex[] = [0, 1, 2, 3, 4, 5];
+function parseSlotIndex(id: string | number): TeamSlotIndex | null {
+  if (typeof id !== 'string' || !id.startsWith('slot-')) return null;
+  const parsed = Number(id.slice(5));
+  if (parsed >= 0 && parsed <= 5 && Number.isInteger(parsed)) {
+    return parsed as TeamSlotIndex;
+  }
+  return null;
+}
 
-export function TeamDock() {
+interface TeamDockProps {
+  onFocusBrowser: () => void;
+}
+
+export function TeamDock({ onFocusBrowser }: TeamDockProps) {
   const context = useTeamStore((s) => s.context);
   const team = useTeamStore((s) => s.team);
-  const openPicker = useTeamStore((s) => s.openPicker);
+  const toggleSlotGender = useTeamStore((s) => s.toggleSlotGender);
+  const toggleSlotShiny = useTeamStore((s) => s.toggleSlotShiny);
   const openEditor = useTeamStore((s) => s.openEditor);
   const clearSlot = useTeamStore((s) => s.clearSlot);
   const swapSlots = useTeamStore((s) => s.swapSlots);
 
-  const filledCount = team.filter((slot) => slot !== null).length;
+  const [activeDragIndex, setActiveDragIndex] = useState<TeamSlotIndex | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        delay: 150,
+        tolerance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor),
+  );
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveDragIndex(parseSlotIndex(event.active.id));
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const fromIndex = parseSlotIndex(event.active.id);
+    const toIndex = event.over ? parseSlotIndex(event.over.id) : null;
+    setActiveDragIndex(null);
+    if (fromIndex !== null && toIndex !== null && fromIndex !== toIndex) {
+      swapSlots(fromIndex, toIndex);
+    }
+  };
+
+  const activeMember = activeDragIndex !== null ? team[activeDragIndex] : null;
+  const activeSpecies = activeMember
+    ? pkmnDexGateway.getSpecies(activeMember.speciesSlug, context.generation)
+    : null;
 
   return (
-    <section aria-labelledby="team-dock-heading">
-      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-        <h2
-          id="team-dock-heading"
-          className="text-lg font-bold tracking-tight text-[var(--ink-primary)]"
-        >
-          Your Team{' '}
-          <span className="text-sm font-medium tabular-nums text-[var(--ink-muted)]">
-            ({filledCount}/6)
-          </span>
-        </h2>
-        <p className="text-xs text-[var(--ink-muted)]">
-          Press{' '}
-          <kbd className="rounded border border-[var(--border-subtle)] bg-[var(--surface-card)] px-1.5 py-0.5 font-mono text-[11px]">
-            Ctrl+K
-          </kbd>{' '}
-          or keys{' '}
-          <kbd className="rounded border border-[var(--border-subtle)] bg-[var(--surface-card)] px-1.5 py-0.5 font-mono text-[11px]">
-            1–6
-          </kbd>{' '}
-          to pick quickly
-        </p>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
-        {SLOT_INDICES.map((slotIndex) => {
-          const member = team[slotIndex];
-          return (
+    <section aria-label="Your team">
+      <DndContext
+        sensors={sensors}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragCancel={() => setActiveDragIndex(null)}
+      >
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+          {TEAM_SLOT_INDICES.map((slotIndex) => (
             <TeamSlotCard
               key={slotIndex}
               slotIndex={slotIndex}
-              member={member}
+              member={team[slotIndex]}
               context={context}
-              onAdd={() => openPicker(slotIndex)}
+              onFocusBrowser={onFocusBrowser}
+              onToggleGender={() => toggleSlotGender(slotIndex)}
+              onToggleShiny={() => toggleSlotShiny(slotIndex)}
               onEdit={() => openEditor(slotIndex)}
               onRemove={() => clearSlot(slotIndex)}
-              {...(slotIndex > 0
-                ? { onSwapLeft: () => swapSlots(slotIndex, (slotIndex - 1) as TeamSlotIndex) }
-                : {})}
-              {...(slotIndex < 5
-                ? { onSwapRight: () => swapSlots(slotIndex, (slotIndex + 1) as TeamSlotIndex) }
-                : {})}
             />
-          );
-        })}
-      </div>
+          ))}
+        </div>
+
+        <DragOverlay>
+          {activeMember && activeSpecies ? (
+            <div
+              className="flex h-24 w-24 cursor-grabbing items-center justify-center rounded-full shadow-lg"
+              style={{
+                backgroundColor: `color-mix(in srgb, ${TYPE_COLOR_VARS[activeSpecies.types[0]]} 20%, var(--surface-card))`,
+              }}
+            >
+              <PokemonSprite
+                spriteId={activeSpecies.spriteId}
+                dexNumber={activeSpecies.dexNumber}
+                name={activeSpecies.name}
+                size="lg"
+                shiny={Boolean(activeMember.shiny)}
+                gender={activeMember.gender}
+              />
+            </div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
     </section>
   );
 }
