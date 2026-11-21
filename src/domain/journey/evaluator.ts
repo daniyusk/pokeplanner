@@ -1,4 +1,6 @@
+import { MOVE_CATEGORY, TEAM_SLOT_INDICES } from '@/domain/constants';
 import { calculateDefensiveMultiplier, calculateTypeEffectiveness } from '@/domain/mechanics';
+import { resolveTeamEntries } from '@/domain/team';
 import type {
   Checkpoint,
   DexGateway,
@@ -9,7 +11,11 @@ import type {
   Team,
   TeamSlotIndex,
 } from '@/domain/types';
-import { buildCheckpointOrderMap, type JourneyFilterOptions } from './availability';
+import {
+  buildCheckpointOrderMap,
+  diagnoseManifestAvailability,
+  type JourneyFilterOptions,
+} from './availability';
 
 export type JourneySlotStatus =
   | 'ready'
@@ -50,41 +56,28 @@ function evaluateSlotAtCheckpoint(
   checkpointMap: ReadonlyMap<string, Checkpoint>,
   options: JourneyFilterOptions,
 ): JourneySlotDiagnostic {
-  const dexEntry = manifest.dex[species.slug];
-  if (!dexEntry) {
+  const diagnosis = diagnoseManifestAvailability(
+    species.slug,
+    species.name,
+    checkpoint,
+    manifest,
+    checkpointMap,
+    options,
+  );
+
+  if (diagnosis.status === 'not-in-game' || !diagnosis.dexEntry) {
     return {
       slotIndex,
       species,
       status: 'not-in-game',
-      messages: [`${species.name} is not in the ${manifest.shortName} regional Pokédex.`],
+      messages: diagnosis.messages,
     };
   }
 
-  const unlockCheckpoint = checkpointMap.get(dexEntry.earliestCheckpointId);
-  const messages: string[] = [];
-  let status: JourneySlotStatus = 'ready';
+  const messages = [...diagnosis.messages];
+  let status: JourneySlotStatus = diagnosis.status === 'ok' ? 'ready' : diagnosis.status;
 
-  if (
-    options.versionId &&
-    dexEntry.exclusiveToVersions &&
-    dexEntry.exclusiveToVersions.length > 0 &&
-    !dexEntry.exclusiveToVersions.includes(options.versionId)
-  ) {
-    status = 'version-exclusive';
-    messages.push(
-      `Exclusive to ${dexEntry.exclusiveToVersions.join(' / ')} (not catchable in ${options.versionId}).`,
-    );
-  } else if (options.excludeTradeEvolutions && dexEntry.evolutionNotes?.requiresTrade) {
-    status = 'trade-blocked';
-    messages.push(`${species.name} requires a trade evolution (excluded by your campaign rules).`);
-  } else if (unlockCheckpoint && unlockCheckpoint.order > checkpoint.order) {
-    status = 'unavailable-yet';
-    messages.push(
-      `Unlocked later at ${unlockCheckpoint.name}. Consider using a temporary teammate for this checkpoint.`,
-    );
-  }
-
-  const minEvoLv = dexEntry.evolutionNotes?.minEvolutionLevel;
+  const minEvoLv = diagnosis.dexEntry.evolutionNotes?.minEvolutionLevel;
   if (minEvoLv !== undefined && minEvoLv > checkpoint.levelCap) {
     if (status === 'ready') {
       status = 'early-stage-recommended';
@@ -94,8 +87,8 @@ function evaluateSlotAtCheckpoint(
     );
   }
 
-  if (messages.length === 0 && dexEntry.locations[0]) {
-    const loc = dexEntry.locations[0];
+  if (messages.length === 0 && diagnosis.dexEntry.locations[0]) {
+    const loc = diagnosis.dexEntry.locations[0];
     messages.push(
       loc.minLevel !== undefined && loc.maxLevel !== undefined
         ? `${loc.areaName} (Lv ${loc.minLevel}–${loc.maxLevel})`
@@ -107,8 +100,8 @@ function evaluateSlotAtCheckpoint(
     slotIndex,
     species,
     status,
-    dexEntry,
-    ...(unlockCheckpoint ? { unlockCheckpoint } : {}),
+    dexEntry: diagnosis.dexEntry,
+    ...(diagnosis.unlockCheckpoint ? { unlockCheckpoint: diagnosis.unlockCheckpoint } : {}),
     messages,
   };
 }
@@ -119,14 +112,7 @@ function evaluateBossMatchups(
   context: GameContext,
   dex: DexGateway,
 ): { matchups: BossPokemonMatchup[]; overallRating: CheckpointEvaluation['overallRating'] } {
-  const activeMembers = snapshotTeam
-    .map((member) => {
-      if (!member) return null;
-      const species = dex.getSpecies(member.speciesSlug, context.generation);
-      if (!species) return null;
-      return { member, species };
-    })
-    .filter((item): item is NonNullable<typeof item> => item !== null);
+  const activeMembers = resolveTeamEntries(snapshotTeam, context.generation, dex);
 
   let favorableCount = 0;
   let dangerousCount = 0;
@@ -139,10 +125,9 @@ function evaluateBossMatchups(
       const threatens: string[] = [];
 
       for (const { member, species } of activeMembers) {
-        // Check if our teammate hits the boss Pokémon super-effectively (moveset or STAB)
         const moveHitsSe = member.moveSlugs.some((moveSlug) => {
           const move = dex.getMove(moveSlug, context.generation);
-          if (!move || move.category === 'Status' || move.basePower <= 0) return false;
+          if (!move || move.category === MOVE_CATEGORY.Status || move.basePower <= 0) return false;
           return (
             calculateTypeEffectiveness(move.type, bossSpecies.types, context.generation, dex) >= 2
           );
@@ -157,7 +142,6 @@ function evaluateBossMatchups(
           counteredBy.push(species.name);
         }
 
-        // Check if boss's STABs threaten our teammate
         const bossThreatens = bossSpecies.types.some((bossStab) => {
           const mult = calculateDefensiveMultiplier(
             bossStab,
@@ -218,16 +202,15 @@ export function evaluateJourneyCheckpoint(
   context: GameContext,
   dex: DexGateway,
   options: JourneyFilterOptions = {},
+  checkpointMap: ReadonlyMap<string, Checkpoint> = buildCheckpointOrderMap(manifest),
 ): CheckpointEvaluation {
-  const checkpointMap = buildCheckpointOrderMap(manifest);
   const checkpoint = checkpointMap.get(checkpointId) ?? manifest.checkpoints[0];
   if (!checkpoint) {
     throw new Error(`GameManifest "${manifest.id}" has no checkpoints.`);
   }
 
   const slots: (JourneySlotDiagnostic | null)[] = [null, null, null, null, null, null];
-  for (let i = 0; i < 6; i++) {
-    const slotIndex = i as TeamSlotIndex;
+  for (const slotIndex of TEAM_SLOT_INDICES) {
     const member = snapshotTeam[slotIndex];
     if (!member) continue;
     const species = dex.getSpecies(member.speciesSlug, context.generation);

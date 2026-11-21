@@ -1,5 +1,7 @@
 export {
   buildCheckpointOrderMap,
+  buildVirtualFinalCheckpoint,
+  FINAL_SEGMENT_CHECKPOINT_ID,
   getAvailableSpeciesAtCheckpoint,
   getAvailableSpeciesInGame,
   isEntryAvailableAtCheckpoint,
@@ -12,4 +14,13 @@ export {
   type JourneySlotDiagnostic,
   type JourneySlotStatus,
 } from './evaluator';
-export { buildDefaultJourneyFromFinalTeam } from './snapshotBuilder';
+export {
+  createEmptyJourneyPlan,
+  type EvaluatedJourneyBranchNode,
+  type EvaluatedJourneyTree,
+  evaluateJourneyTree,
+  getStarterOptionsForGame,
+  type JourneyBranchStatus,
+  type JourneyMilestoneEvaluation,
+  seedJourneyPlanFromTeam,
+} from './treeEvaluator';

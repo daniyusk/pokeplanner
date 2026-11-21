@@ -1,10 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { pkmnDexGateway } from '@/data/dex/pkmnDexGateway';
 import {
-  buildDefaultJourneyFromFinalTeam,
+  buildVirtualFinalCheckpoint,
   evaluateJourneyCheckpoint,
+  FINAL_SEGMENT_CHECKPOINT_ID,
   getAvailableSpeciesAtCheckpoint,
+  getAvailableSpeciesInGame,
 } from '@/domain/journey';
+import {
+  buildCheckpointOrderMap,
+  diagnoseManifestAvailability,
+} from '@/domain/journey/availability';
 import type { CampaignGameContext, GameManifest, Team } from '@/domain/types';
 
 const TEST_MANIFEST: GameManifest = {
@@ -141,6 +147,12 @@ const TEST_MANIFEST: GameManifest = {
       locations: [{ areaName: 'Evolve Riolu (High Friendship, Day)', method: 'evolve' }],
       evolutionNotes: { requiresTrade: false },
     },
+    heatran: {
+      regionalDexNumber: 151,
+      availability: 'post-game',
+      earliestCheckpointId: 'champion-cynthia',
+      locations: [{ areaName: 'Stark Mountain', method: 'static', minLevel: 70, maxLevel: 70 }],
+    },
   },
 };
 
@@ -172,6 +184,39 @@ describe('Domain Journey Seam', () => {
       expect(atGardeniaWithTrades.has('alakazam')).toBe(true);
       expect(atGardeniaWithTrades.has('lucario')).toBe(false);
     });
+
+    it('applies post-game exclusion consistently before Champion and unlocks post-game only in Final segment', () => {
+      expect(getAvailableSpeciesInGame(TEST_MANIFEST).has('heatran')).toBe(false);
+      expect(
+        getAvailableSpeciesAtCheckpoint(TEST_MANIFEST, 'champion-cynthia').has('heatran'),
+      ).toBe(false);
+      expect(
+        getAvailableSpeciesAtCheckpoint(TEST_MANIFEST, FINAL_SEGMENT_CHECKPOINT_ID).has('heatran'),
+      ).toBe(true);
+      expect(
+        getAvailableSpeciesAtCheckpoint(TEST_MANIFEST, FINAL_SEGMENT_CHECKPOINT_ID, {
+          excludePostGame: true,
+        }).has('heatran'),
+      ).toBe(false);
+
+      const cpMap = buildCheckpointOrderMap(TEST_MANIFEST);
+      const cynthia = cpMap.get('champion-cynthia');
+      expect(cynthia).toBeDefined();
+      if (cynthia) {
+        expect(
+          diagnoseManifestAvailability('heatran', 'Heatran', cynthia, TEST_MANIFEST, cpMap).status,
+        ).toBe('unavailable-yet');
+      }
+      expect(
+        diagnoseManifestAvailability(
+          'heatran',
+          'Heatran',
+          buildVirtualFinalCheckpoint(TEST_MANIFEST),
+          TEST_MANIFEST,
+          cpMap,
+        ).status,
+      ).toBe('ok');
+    });
   });
 
   describe('evaluateJourneyCheckpoint', () => {
@@ -202,39 +247,6 @@ describe('Domain Journey Seam', () => {
       // Monferno's Fighting STAB + Garchomp's Ground hit Roark's Rock team super-effectively
       expect(evalRoark.bossMatchups.length).toBe(3);
       expect(evalRoark.overallRating).toBe('Favorable');
-    });
-  });
-
-  describe('buildDefaultJourneyFromFinalTeam', () => {
-    it('maps final evolutions back to checkpoint-appropriate evolutionary stages and omits post-unlock members', () => {
-      const finalTeam: Team = [
-        { speciesSlug: 'infernape', moveSlugs: [] },
-        { speciesSlug: 'garchomp', moveSlugs: [] },
-        { speciesSlug: 'lucario', moveSlugs: [] },
-        null,
-        null,
-        null,
-      ];
-
-      const snapshots = buildDefaultJourneyFromFinalTeam(finalTeam, TEST_MANIFEST, pkmnDexGateway);
-
-      // Gym 1 (Lv 14): Chimchar evolved to Monferno at 14; Gible isn't unlocked until Gym 2; Riolu not until Gym 6
-      expect(snapshots['gym-1-roark']?.[0]?.speciesSlug).toBe('monferno');
-      expect(snapshots['gym-1-roark']?.[1]).toBeNull();
-      expect(snapshots['gym-1-roark']?.[2]).toBeNull();
-
-      // Gym 2 (Lv 22): Gible is unlocked and stays Gible (Gabite evolves at Lv 24)
-      expect(snapshots['gym-2-gardenia']?.[0]?.speciesSlug).toBe('monferno');
-      expect(snapshots['gym-2-gardenia']?.[1]?.speciesSlug).toBe('gible');
-      expect(snapshots['gym-2-gardenia']?.[2]).toBeNull();
-
-      // Gym 6 (Lv 41): Infernape (Lv 36), Gabite (Lv 24..47), Lucario (friendship evo unlocked at Gym 6)
-      expect(snapshots['gym-6-byron']?.[0]?.speciesSlug).toBe('infernape');
-      expect(snapshots['gym-6-byron']?.[1]?.speciesSlug).toBe('gabite');
-      expect(snapshots['gym-6-byron']?.[2]?.speciesSlug).toBe('lucario');
-
-      // Champion (Lv 62): Full final forms
-      expect(snapshots['champion-cynthia']?.[1]?.speciesSlug).toBe('garchomp');
     });
   });
 });
