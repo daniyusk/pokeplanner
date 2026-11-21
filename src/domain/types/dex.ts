@@ -6,6 +6,7 @@ import type {
   MoveCategory,
   MoveSlug,
   NatureId,
+  PokemonGender,
   PokemonType,
   SpeciesSlug,
   StatId,
@@ -20,14 +21,19 @@ export interface SpeciesData {
   types: readonly [PokemonType] | readonly [PokemonType, PokemonType];
   baseStats: StatsTable;
   abilities: readonly AbilitySlug[];
+  availableGenders: readonly PokemonGender[];
+  generationIntroduced: GenerationNumber;
   baseSpeciesSlug: SpeciesSlug;
   forme?: string;
   otherFormeSlugs: readonly SpeciesSlug[];
   isMega: boolean;
   isLegendary: boolean;
+  isBattleOnly: boolean;
   nfe: boolean;
   prevoSlug?: SpeciesSlug;
   evoSlugs: readonly SpeciesSlug[];
+  evoLevel?: number;
+  evoCondition?: string;
 }
 
 export interface MoveData {

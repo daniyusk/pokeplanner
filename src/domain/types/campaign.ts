@@ -1,7 +1,12 @@
+import type {
+  CHECKPOINT_CATEGORIES,
+  DEX_AVAILABILITY_TYPES,
+  ENCOUNTER_METHODS,
+} from '@/domain/constants/pokemon';
 import type { GameMechanicsFlags } from './game';
 import type { GenerationNumber, PokemonType, SpeciesSlug } from './pokemon';
 
-export type CheckpointCategory = 'gym' | 'rival' | 'elite-four' | 'champion' | 'post-game';
+export type CheckpointCategory = (typeof CHECKPOINT_CATEGORIES)[number];
 
 export interface Checkpoint {
   id: string;
@@ -15,20 +20,9 @@ export interface Checkpoint {
   unlockedLocations: readonly string[];
 }
 
-export type EncounterMethod =
-  | 'starter'
-  | 'grass'
-  | 'cave'
-  | 'surf'
-  | 'fish'
-  | 'gift'
-  | 'static'
-  | 'fossil'
-  | 'trade'
-  | 'evolve'
-  | 'headbutt'
-  | 'honey-tree'
-  | 'swarm';
+export type EncounterMethod = (typeof ENCOUNTER_METHODS)[number];
+
+export type DexAvailability = (typeof DEX_AVAILABILITY_TYPES)[number];
 
 export interface EncounterLocation {
   areaName: string;
@@ -47,15 +41,7 @@ export interface EvolutionNotes {
 
 export interface GameDexEntry {
   regionalDexNumber: number;
-  availability:
-    | 'starter'
-    | 'wild'
-    | 'gift'
-    | 'static'
-    | 'fossil'
-    | 'trade-only'
-    | 'evolution'
-    | 'post-game';
+  availability: DexAvailability;
   exclusiveToVersions?: readonly string[];
   earliestCheckpointId: string;
   locations: readonly EncounterLocation[];

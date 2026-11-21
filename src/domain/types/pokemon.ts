@@ -1,31 +1,20 @@
-export type GenerationNumber = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+import {
+  type ALL_GENERATIONS,
+  type ALL_POKEMON_GENDERS,
+  ALL_POKEMON_TYPES,
+  type MOVE_CATEGORY,
+  type STAT_KEYS,
+} from '@/domain/constants/pokemon';
 
-export const ALL_POKEMON_TYPES = [
-  'Normal',
-  'Fire',
-  'Water',
-  'Electric',
-  'Grass',
-  'Ice',
-  'Fighting',
-  'Poison',
-  'Ground',
-  'Flying',
-  'Psychic',
-  'Bug',
-  'Rock',
-  'Ghost',
-  'Dragon',
-  'Dark',
-  'Steel',
-  'Fairy',
-] as const;
+export { ALL_POKEMON_TYPES };
+
+export type GenerationNumber = (typeof ALL_GENERATIONS)[number];
 
 export type PokemonType = (typeof ALL_POKEMON_TYPES)[number];
 
-export type MoveCategory = 'Physical' | 'Special' | 'Status';
+export type MoveCategory = (typeof MOVE_CATEGORY)[keyof typeof MOVE_CATEGORY];
 
-export type StatId = 'hp' | 'atk' | 'def' | 'spa' | 'spd' | 'spe';
+export type StatId = (typeof STAT_KEYS)[number];
 
 export type StatsTable = Record<StatId, number>;
 
@@ -34,6 +23,8 @@ export type MoveSlug = string;
 export type AbilitySlug = string;
 export type ItemSlug = string;
 export type NatureId = string;
+
+export type PokemonGender = (typeof ALL_POKEMON_GENDERS)[number];
 
 export type TeamSlotIndex = 0 | 1 | 2 | 3 | 4 | 5;
 
@@ -46,6 +37,8 @@ export interface TeamMember {
   teraType?: PokemonType;
   level?: number;
   nickname?: string;
+  gender?: PokemonGender;
+  shiny?: boolean;
 }
 
 export type TeamSlot = TeamMember | null;

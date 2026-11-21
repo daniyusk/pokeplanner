@@ -1,6 +1,7 @@
+import { type ALL_BATTLE_GIMMICKS, BATTLE_GIMMICK } from '@/domain/constants/pokemon';
 import type { GenerationNumber } from './pokemon';
 
-export type BattleGimmick = 'mega' | 'z-move' | 'dynamax' | 'terastal' | 'alpha';
+export type BattleGimmick = (typeof ALL_BATTLE_GIMMICKS)[number];
 
 export interface GameMechanicsFlags {
   hasAbilities: boolean;
@@ -13,6 +14,7 @@ export interface GameMechanicsFlags {
 export interface FreeModeContext {
   mode: 'free';
   generation: GenerationNumber;
+  unrestricted: boolean;
   mechanics: GameMechanicsFlags;
 }
 
@@ -26,26 +28,31 @@ export interface CampaignGameContext {
 
 export type GameContext = FreeModeContext | CampaignGameContext;
 
-export function getDefaultMechanicsForGeneration(generation: GenerationNumber): GameMechanicsFlags {
-  let gimmick: BattleGimmick | null = null;
-  if (generation === 6) gimmick = 'mega';
-  else if (generation === 7) gimmick = 'z-move';
-  else if (generation === 8) gimmick = 'dynamax';
-  else if (generation === 9) gimmick = 'terastal';
+const GIMMICK_BY_GENERATION: Partial<Record<GenerationNumber, BattleGimmick>> = {
+  6: BATTLE_GIMMICK.Mega,
+  7: BATTLE_GIMMICK.ZMove,
+  8: BATTLE_GIMMICK.Dynamax,
+  9: BATTLE_GIMMICK.Terastal,
+};
 
+export function getDefaultMechanicsForGeneration(generation: GenerationNumber): GameMechanicsFlags {
   return {
     hasAbilities: generation >= 3,
     hasHeldItems: generation >= 2,
     hasNatures: generation >= 3,
     physicalSpecialSplit: generation >= 4,
-    gimmick,
+    gimmick: GIMMICK_BY_GENERATION[generation] ?? null,
   };
 }
 
-export function createFreeModeContext(generation: GenerationNumber = 9): FreeModeContext {
+export function createFreeModeContext(
+  generation: GenerationNumber = 9,
+  unrestricted: boolean = generation === 9,
+): FreeModeContext {
   return {
     mode: 'free',
     generation,
+    unrestricted,
     mechanics: getDefaultMechanicsForGeneration(generation),
   };
 }
