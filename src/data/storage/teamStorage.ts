@@ -1,52 +1,18 @@
 import { get, set } from 'idb-keyval';
 import { z } from 'zod';
-import { ALL_POKEMON_TYPES, type GenerationNumber, type Team } from '@/domain/types';
-
-const SAVED_TEAMS_KEY = 'pokeplanner:saved-teams:v1';
-const THEME_STORAGE_KEY = 'pokeplanner:theme';
+import { STORAGE_KEYS } from '@/data/config/storageKeys';
+import {
+  genderSchema,
+  generationSchema,
+  levelSchema,
+  moveSlugsSchema,
+  nicknameSchema,
+  pokemonTypeSchema,
+  teamNameSchema,
+} from '@/domain/schemas';
+import type { GenerationNumber, Team, TeamMember } from '@/domain/types';
 
 export type ThemeMode = 'light' | 'dark';
-
-const generationSchema = z.union([
-  z.literal(1),
-  z.literal(2),
-  z.literal(3),
-  z.literal(4),
-  z.literal(5),
-  z.literal(6),
-  z.literal(7),
-  z.literal(8),
-  z.literal(9),
-]);
-
-const teamMemberSchema = z.object({
-  speciesSlug: z.string().min(1),
-  abilitySlug: z.string().optional(),
-  itemSlug: z.string().optional(),
-  natureId: z.string().optional(),
-  moveSlugs: z.array(z.string()).max(4),
-  teraType: z.enum(ALL_POKEMON_TYPES).optional(),
-  level: z.number().int().min(1).max(100).optional(),
-  nickname: z.string().max(32).optional(),
-});
-
-const savedTeamRecordSchema = z.object({
-  id: z.string().min(1),
-  name: z.string().min(1).max(60),
-  updatedAt: z.string(),
-  mode: z.enum(['free', 'campaign']),
-  generation: generationSchema,
-  gameId: z.string().optional(),
-  versionId: z.string().optional(),
-  team: z.tuple([
-    teamMemberSchema.nullable(),
-    teamMemberSchema.nullable(),
-    teamMemberSchema.nullable(),
-    teamMemberSchema.nullable(),
-    teamMemberSchema.nullable(),
-    teamMemberSchema.nullable(),
-  ]),
-});
 
 export interface SavedTeamRecord {
   id: string;
@@ -59,6 +25,37 @@ export interface SavedTeamRecord {
   team: Team;
 }
 
+const teamMemberSchema = z.object({
+  speciesSlug: z.string().min(1),
+  abilitySlug: z.string().exactOptional(),
+  itemSlug: z.string().exactOptional(),
+  natureId: z.string().exactOptional(),
+  moveSlugs: moveSlugsSchema,
+  teraType: pokemonTypeSchema.exactOptional(),
+  level: levelSchema.exactOptional(),
+  nickname: nicknameSchema.exactOptional(),
+  gender: genderSchema.exactOptional(),
+  shiny: z.boolean().exactOptional(),
+}) satisfies z.ZodType<TeamMember>;
+
+const savedTeamRecordSchema = z.object({
+  id: z.string().min(1),
+  name: teamNameSchema.min(1),
+  updatedAt: z.string(),
+  mode: z.enum(['free', 'campaign']),
+  generation: generationSchema,
+  gameId: z.string().exactOptional(),
+  versionId: z.string().exactOptional(),
+  team: z.tuple([
+    teamMemberSchema.nullable(),
+    teamMemberSchema.nullable(),
+    teamMemberSchema.nullable(),
+    teamMemberSchema.nullable(),
+    teamMemberSchema.nullable(),
+    teamMemberSchema.nullable(),
+  ]),
+}) satisfies z.ZodType<SavedTeamRecord>;
+
 const savedTeamListSchema = z.array(savedTeamRecordSchema);
 
 /**
@@ -66,11 +63,11 @@ const savedTeamListSchema = z.array(savedTeamRecordSchema);
  */
 export async function listSavedTeams(): Promise<SavedTeamRecord[]> {
   try {
-    const raw = await get(SAVED_TEAMS_KEY);
+    const raw = await get(STORAGE_KEYS.savedTeams);
     if (!raw) return [];
     const parsed = savedTeamListSchema.safeParse(raw);
     if (!parsed.success) return [];
-    return parsed.data as SavedTeamRecord[];
+    return parsed.data;
   } catch {
     return [];
   }
@@ -83,7 +80,7 @@ export async function saveTeamRecord(record: SavedTeamRecord): Promise<SavedTeam
   const existing = await listSavedTeams();
   const filtered = existing.filter((item) => item.id !== record.id);
   const next = [record, ...filtered].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
-  await set(SAVED_TEAMS_KEY, next);
+  await set(STORAGE_KEYS.savedTeams, next);
   return next;
 }
 
@@ -93,13 +90,13 @@ export async function saveTeamRecord(record: SavedTeamRecord): Promise<SavedTeam
 export async function deleteSavedTeamRecord(id: string): Promise<SavedTeamRecord[]> {
   const existing = await listSavedTeams();
   const next = existing.filter((item) => item.id !== id);
-  await set(SAVED_TEAMS_KEY, next);
+  await set(STORAGE_KEYS.savedTeams, next);
   return next;
 }
 
 export function getThemePreference(): ThemeMode {
   try {
-    const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+    const stored = window.localStorage.getItem(STORAGE_KEYS.theme);
     if (stored === 'light' || stored === 'dark') return stored;
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   } catch {
@@ -109,7 +106,7 @@ export function getThemePreference(): ThemeMode {
 
 export function setThemePreference(theme: ThemeMode): void {
   try {
-    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+    window.localStorage.setItem(STORAGE_KEYS.theme, theme);
   } catch {
     // Ignore storage errors in restricted contexts
   }

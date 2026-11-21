@@ -51,4 +51,51 @@ describe('pkmnDexGateway Seam', () => {
     expect(garchompMoves).toContain('earthquake');
     expect(garchompMoves).toContain('dragonclaw');
   });
+
+  it('provides unrestricted National Dex species, moves, and items in Gen 9 Free Mode', async () => {
+    const gen9Species = pkmnDexGateway.listSpecies(9);
+    expect(gen9Species.some((s) => s.slug === 'nidoking')).toBe(true);
+    expect(gen9Species.some((s) => s.slug === 'starmie')).toBe(true);
+    expect(gen9Species.some((s) => s.slug === 'togekiss')).toBe(true);
+    expect(gen9Species.some((s) => s.slug === 'charizardmegax')).toBe(true);
+
+    const nidokingMoves = await pkmnDexGateway.getLearnableMoveSlugs('nidoking', 9);
+    expect(nidokingMoves).toContain('earthpower');
+    expect(nidokingMoves).toContain('sludgewave');
+  });
+
+  it('derives availableGenders, generationIntroduced, and evolution metadata accurately', () => {
+    expect(pkmnDexGateway.getSpecies('pikachu', 9)?.availableGenders).toEqual(['M', 'F']);
+    expect(pkmnDexGateway.getSpecies('nidoking', 9)?.availableGenders).toEqual(['M']);
+    expect(pkmnDexGateway.getSpecies('blissey', 9)?.availableGenders).toEqual(['F']);
+    expect(pkmnDexGateway.getSpecies('magnemite', 9)?.availableGenders).toEqual(['N']);
+    expect(pkmnDexGateway.getSpecies('pikachu', 1)?.availableGenders).toEqual(['N']);
+
+    expect(pkmnDexGateway.getSpecies('charizard', 9)?.generationIntroduced).toBe(1);
+    expect(pkmnDexGateway.getSpecies('charizard', 9)?.evoLevel).toBe(36);
+    expect(pkmnDexGateway.getSpecies('raichualola', 9)?.generationIntroduced).toBe(7);
+  });
+
+  it('excludes Gigantamax and Eternamax boss forms from listSpecies in Gen 8 and Gen 9', () => {
+    const gen8Slugs = new Set(pkmnDexGateway.listSpecies(8).map((s) => s.slug));
+    const gen9Slugs = new Set(pkmnDexGateway.listSpecies(9).map((s) => s.slug));
+
+    expect(gen8Slugs.has('charizardgmax')).toBe(false);
+    expect(gen8Slugs.has('toxtricitylowkeygmax')).toBe(false);
+    expect(gen9Slugs.has('charizardgmax')).toBe(false);
+    expect(gen9Slugs.has('eternatuseternamax')).toBe(false);
+    expect(gen9Slugs.has('urshifurapidstrikegmax')).toBe(false);
+  });
+
+  it('caches repeated point lookups and learnable move lists per generation', async () => {
+    expect(pkmnDexGateway.getSpecies('garchomp', 5)).toBe(pkmnDexGateway.getSpecies('Garchomp', 5));
+    expect(pkmnDexGateway.getMove('earthquake', 5)).toBe(pkmnDexGateway.getMove('Earthquake', 5));
+    expect(pkmnDexGateway.getAbility('levitate', 5)).toBe(pkmnDexGateway.getAbility('Levitate', 5));
+    expect(pkmnDexGateway.getItem('leftovers', 5)).toBe(pkmnDexGateway.getItem('Leftovers', 5));
+    expect(pkmnDexGateway.getNature('Adamant', 5)).toBe(pkmnDexGateway.getNature('adamant', 5));
+
+    const firstLearnset = await pkmnDexGateway.getLearnableMoveSlugs('garchomp', 5);
+    const secondLearnset = await pkmnDexGateway.getLearnableMoveSlugs('garchomp', 5);
+    expect(secondLearnset).toBe(firstLearnset);
+  });
 });
