@@ -3,6 +3,7 @@ import { Check, Copy, Download, Upload, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { pkmnDexGateway } from '@/data/dex/pkmnDexGateway';
 import { exportTeamToShowdown, importTeamFromShowdown } from '@/domain/sharing';
+import { useTransientFlag } from '@/hooks/useTransientFlag';
 import { useTeamStore } from '@/stores/useTeamStore';
 
 interface ShareShowdownModalProps {
@@ -12,6 +13,14 @@ interface ShareShowdownModalProps {
 }
 
 export function ShareShowdownModal({ open, onOpenChange, shareUrl }: ShareShowdownModalProps) {
+  if (!open) return null;
+  return <ShareShowdownModalContent onOpenChange={onOpenChange} shareUrl={shareUrl} />;
+}
+
+function ShareShowdownModalContent({
+  onOpenChange,
+  shareUrl,
+}: Omit<ShareShowdownModalProps, 'open'>) {
   const team = useTeamStore((s) => s.team);
   const context = useTeamStore((s) => s.context);
   const hydrateTeam = useTeamStore((s) => s.hydrateTeam);
@@ -19,8 +28,8 @@ export function ShareShowdownModal({ open, onOpenChange, shareUrl }: ShareShowdo
   const [tab, setTab] = useState<'export' | 'import'>('export');
   const [importText, setImportText] = useState('');
   const [warnings, setWarnings] = useState<readonly string[]>([]);
-  const [copiedPaste, setCopiedPaste] = useState(false);
-  const [copiedUrl, setCopiedUrl] = useState(false);
+  const [copiedPaste, triggerCopiedPaste] = useTransientFlag(1800);
+  const [copiedUrl, triggerCopiedUrl] = useTransientFlag(1800);
 
   const exportedPaste = useMemo(
     () => exportTeamToShowdown(team, context, pkmnDexGateway),
@@ -30,8 +39,7 @@ export function ShareShowdownModal({ open, onOpenChange, shareUrl }: ShareShowdo
   const handleCopyUrl = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
-      setCopiedUrl(true);
-      setTimeout(() => setCopiedUrl(false), 1800);
+      triggerCopiedUrl();
     } catch {
       // Clipboard blocked in non-HTTPS contexts
     }
@@ -41,8 +49,7 @@ export function ShareShowdownModal({ open, onOpenChange, shareUrl }: ShareShowdo
     if (!exportedPaste) return;
     try {
       await navigator.clipboard.writeText(exportedPaste);
-      setCopiedPaste(true);
-      setTimeout(() => setCopiedPaste(false), 1800);
+      triggerCopiedPaste();
     } catch {
       // Clipboard blocked
     }
@@ -59,7 +66,7 @@ export function ShareShowdownModal({ open, onOpenChange, shareUrl }: ShareShowdo
   };
 
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+    <Dialog.Root open onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-40 bg-black/55 backdrop-blur-[2px]" />
         <Dialog.Content className="fixed top-[8%] left-1/2 z-50 flex max-h-[84vh] w-[94vw] max-w-xl -translate-x-1/2 flex-col overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] shadow-[var(--shadow-overlay)]">

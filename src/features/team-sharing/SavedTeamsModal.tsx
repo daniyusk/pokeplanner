@@ -1,8 +1,11 @@
 import * as Dialog from '@radix-ui/react-dialog';
+import { useNavigate } from '@tanstack/react-router';
 import { BookmarkPlus, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 import { PokemonSprite } from '@/components/pokemon/PokemonSprite';
 import { pkmnDexGateway } from '@/data/dex/pkmnDexGateway';
+import type { SavedTeamRecord } from '@/data/storage/teamStorage';
+import { TEAM_SLOT_INDICES, TEXT_LIMITS } from '@/domain/constants';
 import { useTeamStore } from '@/stores/useTeamStore';
 
 interface SavedTeamsModalProps {
@@ -11,6 +14,7 @@ interface SavedTeamsModalProps {
 }
 
 export function SavedTeamsModal({ open, onOpenChange }: SavedTeamsModalProps) {
+  const navigate = useNavigate();
   const team = useTeamStore((s) => s.team);
   const teamName = useTeamStore((s) => s.teamName);
   const savedTeams = useTeamStore((s) => s.savedTeams);
@@ -19,6 +23,7 @@ export function SavedTeamsModal({ open, onOpenChange }: SavedTeamsModalProps) {
   const deleteSavedTeam = useTeamStore((s) => s.deleteSavedTeam);
 
   const [nameInput, setNameInput] = useState('');
+  const [loadingId, setLoadingId] = useState<string | null>(null);
   const hasAnyMember = team.some((s) => s !== null);
 
   const handleSave = async (e: React.FormEvent) => {
@@ -26,6 +31,35 @@ export function SavedTeamsModal({ open, onOpenChange }: SavedTeamsModalProps) {
     if (!hasAnyMember) return;
     await saveCurrentTeam(nameInput || teamName || undefined);
     setNameInput('');
+  };
+
+  const handleLoad = async (record: SavedTeamRecord) => {
+    const prevContext = useTeamStore.getState().context;
+    setLoadingId(record.id);
+    try {
+      await loadSavedTeam(record.id);
+      const nextContext = useTeamStore.getState().context;
+      onOpenChange(false);
+
+      const routeChanged =
+        prevContext.mode !== nextContext.mode ||
+        (prevContext.mode === 'campaign' &&
+          nextContext.mode === 'campaign' &&
+          prevContext.gameId !== nextContext.gameId);
+
+      if (routeChanged) {
+        if (nextContext.mode === 'campaign') {
+          void navigate({
+            to: '/game/$gameId/team',
+            params: { gameId: nextContext.gameId },
+          });
+        } else {
+          void navigate({ to: '/free' });
+        }
+      }
+    } finally {
+      setLoadingId(null);
+    }
   };
 
   return (
@@ -59,7 +93,7 @@ export function SavedTeamsModal({ open, onOpenChange }: SavedTeamsModalProps) {
                 onChange={(e) => setNameInput(e.target.value)}
                 placeholder={teamName || 'Name your current team (e.g., Platinum Run)...'}
                 aria-label="Team name"
-                maxLength={60}
+                maxLength={TEXT_LIMITS.teamNameMaxLength}
                 className="h-9 flex-1 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-elevated)] px-3 text-xs text-[var(--ink-primary)]"
               />
               <button
@@ -90,11 +124,11 @@ export function SavedTeamsModal({ open, onOpenChange }: SavedTeamsModalProps) {
                           {record.name}
                         </p>
                         <span className="shrink-0 text-[11px] font-medium tabular-nums text-[var(--ink-muted)]">
-                          Gen {record.generation}
+                          {record.mode === 'free' ? 'Free Mode' : `Gen ${record.generation}`}
                         </span>
                       </div>
                       <div className="mt-1.5 flex items-center gap-1">
-                        {([0, 1, 2, 3, 4, 5] as const).map((slotPos) => {
+                        {TEAM_SLOT_INDICES.map((slotPos) => {
                           const slot = record.team[slotPos];
                           if (!slot) return null;
                           const sp = pkmnDexGateway.getSpecies(slot.speciesSlug, record.generation);
@@ -105,8 +139,7 @@ export function SavedTeamsModal({ open, onOpenChange }: SavedTeamsModalProps) {
                               spriteId={sp.spriteId}
                               dexNumber={sp.dexNumber}
                               name={sp.name}
-                              size="sm"
-                              className="h-8 w-8"
+                              size="xs"
                             />
                           );
                         })}
@@ -116,13 +149,11 @@ export function SavedTeamsModal({ open, onOpenChange }: SavedTeamsModalProps) {
                     <div className="flex items-center gap-1.5">
                       <button
                         type="button"
-                        onClick={() => {
-                          loadSavedTeam(record.id);
-                          onOpenChange(false);
-                        }}
-                        className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)] px-3 py-1.5 text-xs font-semibold text-[var(--ink-primary)] transition hover:border-[var(--accent-primary)]"
+                        disabled={loadingId === record.id}
+                        onClick={() => void handleLoad(record)}
+                        className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)] px-3 py-1.5 text-xs font-semibold text-[var(--ink-primary)] transition hover:border-[var(--accent-primary)] disabled:opacity-45"
                       >
-                        Load
+                        {loadingId === record.id ? 'Loading…' : 'Load'}
                       </button>
                       <button
                         type="button"
