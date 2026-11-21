@@ -1,5 +1,19 @@
-import type { DexGateway, GameContext, PokemonType, Team, TeamMember } from '@/domain/types';
-import { createEmptyTeam } from './teamHelpers';
+import {
+  BATTLE_GIMMICK,
+  LEVEL_BOUNDS,
+  MAX_MOVES_PER_MEMBER,
+  POKEMON_GENDER,
+  TEAM_SIZE,
+} from '@/domain/constants';
+import { createEmptyTeam } from '@/domain/team';
+import type {
+  DexGateway,
+  GameContext,
+  PokemonGender,
+  PokemonType,
+  Team,
+  TeamMember,
+} from '@/domain/types';
 
 export interface ShowdownImportResult {
   team: Team;
@@ -19,13 +33,17 @@ export function exportTeamToShowdown(team: Team, context: GameContext, dex: DexG
 
     const lines: string[] = [];
     const displayName = slot.nickname ? `${slot.nickname} (${species.name})` : species.name;
+    const genderSuffix =
+      slot.gender === POKEMON_GENDER.Male || slot.gender === POKEMON_GENDER.Female
+        ? ` (${slot.gender})`
+        : '';
 
     let itemSuffix = '';
     if (context.mechanics.hasHeldItems && slot.itemSlug) {
       const item = dex.getItem(slot.itemSlug, context.generation);
       if (item) itemSuffix = ` @ ${item.name}`;
     }
-    lines.push(`${displayName}${itemSuffix}`);
+    lines.push(`${displayName}${genderSuffix}${itemSuffix}`);
 
     if (context.mechanics.hasAbilities && slot.abilitySlug) {
       const ability = dex.getAbility(slot.abilitySlug, context.generation);
@@ -36,7 +54,11 @@ export function exportTeamToShowdown(team: Team, context: GameContext, dex: DexG
       lines.push(`Level: ${slot.level}`);
     }
 
-    if (context.mechanics.gimmick === 'terastal' && slot.teraType) {
+    if (slot.shiny) {
+      lines.push('Shiny: Yes');
+    }
+
+    if (context.mechanics.gimmick === BATTLE_GIMMICK.Terastal && slot.teraType) {
       lines.push(`Tera Type: ${slot.teraType}`);
     }
 
@@ -59,13 +81,15 @@ export function exportTeamToShowdown(team: Team, context: GameContext, dex: DexG
 function parseHeaderLine(headerLine: string): {
   speciesName: string;
   nickname?: string;
+  gender?: PokemonGender;
   itemName?: string;
 } {
   const atIndex = headerLine.lastIndexOf(' @ ');
   const rawLeft = atIndex >= 0 ? headerLine.slice(0, atIndex).trim() : headerLine.trim();
   const itemName = atIndex >= 0 ? headerLine.slice(atIndex + 3).trim() : undefined;
 
-  // Strip trailing gender marker "(M)" or "(F)"
+  const genderMatch = /\s+\((M|F)\)$/i.exec(rawLeft);
+  const gender = genderMatch?.[1] ? (genderMatch[1].toUpperCase() as 'M' | 'F') : undefined;
   const withoutGender = rawLeft.replace(/\s+\((M|F)\)$/i, '').trim();
 
   // Check for "Nickname (Species)"
@@ -74,12 +98,14 @@ function parseHeaderLine(headerLine: string): {
     return {
       nickname: parenMatch[1].trim(),
       speciesName: parenMatch[2].trim(),
+      ...(gender ? { gender } : {}),
       ...(itemName ? { itemName } : {}),
     };
   }
 
   return {
     speciesName: withoutGender,
+    ...(gender ? { gender } : {}),
     ...(itemName ? { itemName } : {}),
   };
 }
@@ -101,7 +127,7 @@ export function importTeamFromShowdown(
     .split(/\r?\n\s*\r?\n/)
     .map((b) => b.trim())
     .filter(Boolean)
-    .slice(0, 6);
+    .slice(0, TEAM_SIZE);
 
   let slotIndex = 0;
 
@@ -113,7 +139,7 @@ export function importTeamFromShowdown(
     const header = lines[0];
     if (!header) continue;
 
-    const { speciesName, nickname, itemName } = parseHeaderLine(header);
+    const { speciesName, nickname, gender, itemName } = parseHeaderLine(header);
     const species = dex.getSpecies(speciesName, context.generation);
     if (!species) {
       warnings.push(`Unknown species "${speciesName}" for generation ${context.generation}.`);
@@ -125,6 +151,7 @@ export function importTeamFromShowdown(
     let natureId: string | undefined;
     let teraType: PokemonType | undefined;
     let level: number | undefined;
+    let shiny = false;
     const moveSlugs: string[] = [];
 
     if (itemName && context.mechanics.hasHeldItems) {
@@ -147,10 +174,19 @@ export function importTeamFromShowdown(
         else warnings.push(`Unknown ability "${abilityName}" for ${species.name}.`);
       } else if (line.startsWith('Level:')) {
         const parsedLevel = Number.parseInt(line.slice('Level:'.length).trim(), 10);
-        if (Number.isFinite(parsedLevel) && parsedLevel >= 1 && parsedLevel <= 100) {
+        if (
+          Number.isFinite(parsedLevel) &&
+          parsedLevel >= LEVEL_BOUNDS.min &&
+          parsedLevel <= LEVEL_BOUNDS.max
+        ) {
           level = parsedLevel;
         }
-      } else if (line.startsWith('Tera Type:') && context.mechanics.gimmick === 'terastal') {
+      } else if (/^Shiny:\s*Yes$/i.test(line)) {
+        shiny = true;
+      } else if (
+        line.startsWith('Tera Type:') &&
+        context.mechanics.gimmick === BATTLE_GIMMICK.Terastal
+      ) {
         const rawTera = line.slice('Tera Type:'.length).trim();
         const availableTypes = dex.getAvailableTypes(context.generation);
         const matchType = availableTypes.find((t) => t.toLowerCase() === rawTera.toLowerCase());
@@ -159,7 +195,7 @@ export function importTeamFromShowdown(
         const rawNature = line.slice(0, -' Nature'.length).trim();
         const nature = dex.getNature(rawNature, context.generation);
         if (nature) natureId = nature.id;
-      } else if (line.startsWith('- ') && moveSlugs.length < 4) {
+      } else if (line.startsWith('- ') && moveSlugs.length < MAX_MOVES_PER_MEMBER) {
         const moveName = line.slice(2).trim();
         const move = dex.getMove(moveName, context.generation);
         if (move) moveSlugs.push(move.slug);
@@ -176,6 +212,8 @@ export function importTeamFromShowdown(
       ...(teraType ? { teraType } : {}),
       ...(level !== undefined ? { level } : {}),
       ...(nickname ? { nickname } : {}),
+      ...(gender && species.availableGenders.includes(gender) ? { gender } : {}),
+      ...(shiny ? { shiny: true } : {}),
     };
 
     team[slotIndex] = member;

@@ -80,6 +80,41 @@ describe('Domain Sharing Seam', () => {
       }
     });
 
+    it('round-trips gender and shiny flags via v2_ payload while preserving v1_ decoding', () => {
+      const state: ShareableTeamState = {
+        version: 2,
+        mode: 'free',
+        generation: 9,
+        team: [
+          {
+            speciesSlug: 'garchomp',
+            abilitySlug: 'roughskin',
+            moveSlugs: ['earthquake'],
+            gender: 'F',
+            shiny: true,
+          },
+          {
+            speciesSlug: 'pikachu',
+            moveSlugs: [],
+            gender: 'M',
+          },
+          null,
+          null,
+          null,
+          null,
+        ],
+      };
+
+      const params = encodeTeamToSearchParams(state);
+      expect(params.p).toMatch(/^v2_/);
+
+      const decoded = decodeTeamFromSearchParams(params, pkmnDexGateway);
+      expect(decoded.ok).toBe(true);
+      if (decoded.ok) {
+        expect(decoded.state).toEqual(state);
+      }
+    });
+
     it('returns a typed error for corrupted v1_ payloads or invalid generation params', () => {
       const badPayload = decodeTeamFromSearchParams(
         { p: 'v1_not_valid_compressed' },
@@ -132,6 +167,8 @@ describe('Domain Sharing Seam', () => {
           moveSlugs: ['earthquake', 'dragonclaw', 'swordsdance', 'firefang'],
           teraType: 'Steel',
           nickname: 'Chompy',
+          gender: 'M',
+          shiny: true,
         },
         null,
         null,
@@ -141,19 +178,21 @@ describe('Domain Sharing Seam', () => {
       ];
 
       const paste = exportTeamToShowdown(team, context, pkmnDexGateway);
-      expect(paste).toContain('Chompy (Garchomp) @ Rocky Helmet');
+      expect(paste).toContain('Chompy (Garchomp) (M) @ Rocky Helmet');
       expect(paste).toContain('Ability: Rough Skin');
+      expect(paste).toContain('Shiny: Yes');
       expect(paste).toContain('Tera Type: Steel');
       expect(paste).toContain('Jolly Nature');
       expect(paste).toContain('- Earthquake');
       expect(paste).toContain('- Dragon Claw');
     });
 
-    it('imports Showdown paste text including nicknames, genders, items, abilities, natures, and moves', () => {
+    it('imports Showdown paste text including nicknames, genders, shiny, items, abilities, natures, and moves', () => {
       const paste = `
 Chompy (Garchomp) (M) @ Rocky Helmet
 Ability: Rough Skin
 Level: 50
+Shiny: Yes
 Tera Type: Steel
 EVs: 252 Atk / 4 Def / 252 Spe
 Jolly Nature
@@ -178,6 +217,8 @@ Bold Nature
       expect(result.team[0]).toEqual({
         speciesSlug: 'garchomp',
         nickname: 'Chompy',
+        gender: 'M',
+        shiny: true,
         itemSlug: 'rockyhelmet',
         abilitySlug: 'roughskin',
         level: 50,

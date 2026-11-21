@@ -3,7 +3,6 @@ export {
   importTeamFromShowdown,
   type ShowdownImportResult,
 } from './showdownCodec';
-export { createEmptyTeam } from './teamHelpers';
 export {
   type DecodeTeamResult,
   decodeTeamFromSearchParams,
