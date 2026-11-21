@@ -31,15 +31,16 @@ Combines Richi3f Pokémon Team Planner's low-friction 6-slot visual clarity with
 
 ## Capabilities and Constraints
 
-- **Team Builder**: Free Mode (unrestricted National Dex across Gen 1–9) or Game Mode (contextualized rules, Pokédex, and availability); configure species/forms, up to 4 moves, ability, held item, nature, and gimmick flags where supported by the selected generation.
+- **Game Selection & Free Mode**: Entry screen presents curated mainline campaigns alongside an independent, generation-free **Free Mode** with unrestricted National Dex access (no generation picker or game restrictions).
+- **Team Planner**: 6-slot minimalist team dock (Pokémon sprite, discreet name, accessible types, Gender toggle, Shiny toggle, and Adjust drawer for moves/ability/item/nature/tera) paired with an inline visual sprite browser (search + filters, one-click add/remove, zero tile text clutter). Team Analysis and Smart Recommendations expand on demand.
 - **Team Analysis**: Generation-accurate defensive type chart (factoring in abilities like Levitate, Thick Fat, Wonder Guard, Flash Fire, Sap Sipper, Earth Eater, and items like Air Balloon), dual offensive coverage (STAB vs. actual Moveset), base stat balance, and actionable threat summaries.
 - **Smart Recommendations**: Local deterministic multi-criteria scoring for Pokémon, moves, abilities, and items with structured human-readable reasons explaining every suggestion.
-- **Journey Planner**: Campaign progression planning by Gym/Checkpoint, level caps, encounter availability, trade-evolution toggles, and temporary early-game team members distinct from the final planned team. Initial campaign scope covers mainline titles up to **Generation 5 (Black 2 & White 2)**.
-- **Team Sharing & Persistence**: Versioned compact shareable URLs, Pokémon Showdown import/export, and local saved-team library in `IndexedDB`.
+- **Standalone Journey Planner**: Dedicated campaign progression tree available exclusively when a game is selected. Rooted in starter choice, divided into campaign checkpoints (Gyms, Elite Four, Champion), and supporting parallel/chained intermediate branches (`Capture`, `Train`, `Evolve`, `Replace`, `Goal`) down to the final team. Initial campaign scope covers mainline titles up to **Generation 5 (Black 2 & White 2)**.
+- **Team Sharing & Persistence**: Versioned compact shareable URLs (`v1_` and `v2_` supporting gender/shiny), Pokémon Showdown import/export, and local saved-team & journey-plan storage in `IndexedDB`.
 
 ## Product Principles
 
-1. **Speed Before Complexity**: Selecting a game and assembling 6 Pokémon must feel effortless and immediate; detailed build controls open progressively without cluttering the main canvas.
+1. **Minimalism & Speed Before Complexity**: Start with game selection; keep team slots stripped to image, name, types, gender, shiny, and adjust; select Pokémon directly from the bottom visual sprite grid; reveal analysis and build drawers progressively.
 2. **Mechanical Truth Over Shortcuts**: Never show misleading type charts—always apply generation-specific rules (Gen 1 vs. Gen 2–5 vs. Gen 6+ type charts, Pre-Gen 4 Physical/Special split) and ability/item immunities.
 3. **Explain Every Recommendation**: Never show an opaque score or unexplained suggestion; every recommendation must state which team weakness, offensive blind spot, stat gap, or campaign bottleneck it solves.
 4. **Accessible by Structure**: Type badges, multipliers, and matrices must never rely solely on color; pair calibrated colors with vector icons and tabular numeric labels.

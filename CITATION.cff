@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+title: "PokéPlanner"
+message: "If you use or build upon PokéPlanner, please cite it using the metadata from this file."
+type: software
+authors:
+  - name: "Daniyusk"
+repository-code: "https://github.com/daniyusk/pokeplanner"
+url: "https://github.com/daniyusk/pokeplanner"
+license: "Apache-2.0"
+version: "1.0.0"
+keywords:
+  - pokemon
+  - team-planner
+  - pokedex
+  - react
+  - typescript
+  - pwa

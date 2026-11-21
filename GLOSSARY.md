@@ -11,17 +11,22 @@ Use this exact vocabulary across TypeScript types, function names, tests, and do
 - **`AbilitySlug`**: Normalized lowercase identifier for an ability (e.g., `'levitate'`, `'thick-fat'`).
 - **`ItemSlug`**: Normalized lowercase identifier for a held item (e.g., `'air-balloon'`, `'leftovers'`).
 - **`NatureId`**: Canonical nature name (e.g., `'Adamant'`, `'Timid'`, `'Modest'`).
+- **`PokemonGender`**: Gender identifier (`'M' | 'F' | 'N'`).
 - **`TeamSlotIndex`**: Fixed slot position in a 6-member team (`0 | 1 | 2 | 3 | 4 | 5`).
-- **`TeamMember`**: A configured Pokémon in a `TeamSlot`, containing `speciesSlug`, optional `abilitySlug`, optional `itemSlug`, optional `natureId`, up to 4 `moveSlugs`, optional `teraType`, and optional `level`.
+- **`TeamMember`**: A configured Pokémon in a `TeamSlot`, containing `speciesSlug`, optional `abilitySlug`, optional `itemSlug`, optional `natureId`, up to 4 `moveSlugs`, optional `teraType`, optional `level`, optional `nickname`, optional `gender`, and optional `shiny`.
 - **`Team`**: Fixed-length array of 6 slots (`[TeamSlot, TeamSlot, TeamSlot, TeamSlot, TeamSlot, TeamSlot]`), where each `TeamSlot` is `TeamMember | null`.
 
 ## Rules & Context
 
 - **`GameMechanicsFlags`**: Generation/title-specific mechanical rules (`hasAbilities`, `hasHeldItems`, `hasNatures`, `physicalSpecialSplit`, `gimmick`).
-- **`GameContext`**: Active ruleset for planning — either `FreeModeContext` (unrestricted National Dex at a chosen `GenerationNumber`) or `CampaignGameContext` (scoped to a specific `GameManifest` and `VersionId`).
+- **`GameContext`**: Active ruleset for planning — either `FreeModeContext` (`mode: 'free'`, `unrestricted` National Dex without game restrictions) or `CampaignGameContext` (scoped to a specific `GameManifest` and `VersionId`).
 - **`GameManifest`**: Curated static JSON dataset for a specific mainline game (up to Black 2 / White 2 initially), containing regional Pokédex availability, version exclusives, encounter locations, and campaign checkpoints.
 - **`Checkpoint`**: A sequential story milestone in a `GameManifest` (e.g., Gym Leader, Elite Four, Champion) with `order`, `levelCap`, `bossNotablePokemon`, and `unlockedLocations`.
-- **`JourneySnapshot`**: The planned team state at a specific `Checkpoint`, allowing early-game temporary members and evolutionary stages distinct from the final team.
+- **`JourneyStepType`**: Action classification for intermediate tree nodes (`'capture' | 'train' | 'evolve' | 'replace' | 'goal'`).
+- **`JourneyStepAction`**: Discriminated union describing a single planned progression step in the Journey Planner tree.
+- **`JourneyStepNode`**: A branchable node placed before a target `Checkpoint` (`beforeCheckpointId`, `parentStepId`, `order`, `action`).
+- **`JourneyPlan`**: Standalone progression plan for a campaign game rooted at `starterSlug` with `steps: JourneyStepNode[]`.
+- **`EvaluatedJourneyTree`**: Computed progression tree output containing derived teams, step diagnostics, and milestone boss evaluations from starter through final team.
 
 ## Analysis & Recommendations
 

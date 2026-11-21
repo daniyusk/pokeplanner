@@ -29,6 +29,7 @@ Always run verification checks using `pnpm`:
 ## 3. Canonical Documentation & Source of Truth
 
 Before making architectural or domain changes, consult:
+- `DESIGN.md` — Minimalist UI/UX design system, component anatomies, and anti-regression guardrails.
 - `GLOSSARY.md` — Ubiquitous domain vocabulary (use exact type and symbol names).
 - `PRODUCT.md` — Confirmed product scope, users, constraints, and campaign roadmap.
 - `docs/adr/` — Architecture Decision Records explaining why key choices were made.
