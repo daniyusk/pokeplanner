@@ -1,4 +1,13 @@
-export { getEffectiveMoveCategory } from './moveCategory';
+export {
+  type AbilityDefensiveDelta,
+  doesAbilityMitigateAnyType,
+  evaluateAbilityDefensiveDelta,
+} from './abilityDelta';
+export {
+  filterLearnableMoves,
+  getEffectiveMoveCategory,
+  resolveMoveCategory,
+} from './moveCategory';
 export {
   calculateDefensiveMultiplier,
   calculateTypeEffectiveness,

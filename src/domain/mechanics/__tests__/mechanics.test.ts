@@ -5,6 +5,7 @@ import {
   calculateTypeEffectiveness,
   getAvailableTypes,
   getEffectiveMoveCategory,
+  resolveMoveCategory,
 } from '@/domain/mechanics';
 import { type CampaignGameContext, createFreeModeContext } from '@/domain/types';
 
@@ -226,6 +227,14 @@ describe('Domain Mechanics Seam', () => {
       expect(getEffectiveMoveCategory('firepunch', gen4, pkmnDexGateway)).toBe('Physical');
       expect(getEffectiveMoveCategory('crunch', gen4, pkmnDexGateway)).toBe('Physical');
       expect(getEffectiveMoveCategory('willowisp', gen4, pkmnDexGateway)).toBe('Status');
+    });
+
+    it('resolves move category directly from MoveData without repeated dex lookups', () => {
+      const gen3 = createFreeModeContext(3);
+      const gen4 = createFreeModeContext(4);
+      expect(resolveMoveCategory({ type: 'Ghost', category: 'Special' }, gen3)).toBe('Physical');
+      expect(resolveMoveCategory({ type: 'Ghost', category: 'Special' }, gen4)).toBe('Special');
+      expect(resolveMoveCategory({ type: 'Fire', category: 'Status' }, gen3)).toBe('Status');
     });
   });
 

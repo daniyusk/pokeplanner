@@ -1,3 +1,4 @@
+import { ABILITY_SLUG, BATTLE_GIMMICK, ITEM_SLUG, POKEMON_TYPE } from '@/domain/constants';
 import {
   type AbilitySlug,
   ALL_POKEMON_TYPES,
@@ -23,17 +24,17 @@ export interface DefensiveMultiplierResult {
 }
 
 const ABILITY_IMMUNITIES: Readonly<Record<string, readonly PokemonType[]>> = {
-  levitate: ['Ground'],
-  eartheater: ['Ground'],
-  voltabsorb: ['Electric'],
-  lightningrod: ['Electric'],
-  motordrive: ['Electric'],
-  waterabsorb: ['Water'],
-  stormdrain: ['Water'],
-  dryskin: ['Water'],
-  flashfire: ['Fire'],
-  wellbakedbody: ['Fire'],
-  sapsipper: ['Grass'],
+  [ABILITY_SLUG.Levitate]: [POKEMON_TYPE.Ground],
+  [ABILITY_SLUG.EarthEater]: [POKEMON_TYPE.Ground],
+  [ABILITY_SLUG.VoltAbsorb]: [POKEMON_TYPE.Electric],
+  [ABILITY_SLUG.LightningRod]: [POKEMON_TYPE.Electric],
+  [ABILITY_SLUG.MotorDrive]: [POKEMON_TYPE.Electric],
+  [ABILITY_SLUG.WaterAbsorb]: [POKEMON_TYPE.Water],
+  [ABILITY_SLUG.StormDrain]: [POKEMON_TYPE.Water],
+  [ABILITY_SLUG.DrySkin]: [POKEMON_TYPE.Water],
+  [ABILITY_SLUG.FlashFire]: [POKEMON_TYPE.Fire],
+  [ABILITY_SLUG.WellBakedBody]: [POKEMON_TYPE.Fire],
+  [ABILITY_SLUG.SapSipper]: [POKEMON_TYPE.Grass],
 };
 
 interface AbilityMultiplierRule {
@@ -43,18 +44,30 @@ interface AbilityMultiplierRule {
 }
 
 const ABILITY_MULTIPLIERS: Readonly<Record<string, AbilityMultiplierRule>> = {
-  thickfat: { types: ['Fire', 'Ice'], factor: 0.5 },
-  heatproof: { types: ['Fire'], factor: 0.5 },
-  purifyingsalt: { types: ['Ghost'], factor: 0.5 },
-  dryskin: { types: ['Fire'], factor: 1.25 },
-  fluffy: { types: ['Fire'], factor: 2 },
-  filter: { types: ALL_POKEMON_TYPES, factor: 0.75, onlyIfSuperEffective: true },
-  solidrock: { types: ALL_POKEMON_TYPES, factor: 0.75, onlyIfSuperEffective: true },
-  prismarmor: { types: ALL_POKEMON_TYPES, factor: 0.75, onlyIfSuperEffective: true },
+  [ABILITY_SLUG.ThickFat]: { types: [POKEMON_TYPE.Fire, POKEMON_TYPE.Ice], factor: 0.5 },
+  [ABILITY_SLUG.Heatproof]: { types: [POKEMON_TYPE.Fire], factor: 0.5 },
+  [ABILITY_SLUG.PurifyingSalt]: { types: [POKEMON_TYPE.Ghost], factor: 0.5 },
+  [ABILITY_SLUG.DrySkin]: { types: [POKEMON_TYPE.Fire], factor: 1.25 },
+  [ABILITY_SLUG.Fluffy]: { types: [POKEMON_TYPE.Fire], factor: 2 },
+  [ABILITY_SLUG.Filter]: {
+    types: ALL_POKEMON_TYPES,
+    factor: 0.75,
+    onlyIfSuperEffective: true,
+  },
+  [ABILITY_SLUG.SolidRock]: {
+    types: ALL_POKEMON_TYPES,
+    factor: 0.75,
+    onlyIfSuperEffective: true,
+  },
+  [ABILITY_SLUG.PrismArmor]: {
+    types: ALL_POKEMON_TYPES,
+    factor: 0.75,
+    onlyIfSuperEffective: true,
+  },
 };
 
 const ITEM_IMMUNITIES: Readonly<Record<string, readonly PokemonType[]>> = {
-  airballoon: ['Ground'],
+  [ITEM_SLUG.AirBalloon]: [POKEMON_TYPE.Ground],
 };
 
 function normalizeSlug(value: string | undefined): string {
@@ -96,7 +109,7 @@ export function calculateDefensiveMultiplier(
   dex: DexGateway,
 ): DefensiveMultiplierResult {
   const effectiveTypes: readonly PokemonType[] =
-    context.mechanics.gimmick === 'terastal' && defender.teraType
+    context.mechanics.gimmick === BATTLE_GIMMICK.Terastal && defender.teraType
       ? [defender.teraType]
       : defender.types;
 
@@ -128,7 +141,7 @@ export function calculateDefensiveMultiplier(
       };
     }
 
-    if (ability === 'wonderguard' && baseMultiplier < 2) {
+    if (ability === ABILITY_SLUG.WonderGuard && baseMultiplier < 2) {
       return {
         multiplier: 0,
         modifierSource: 'ability',
