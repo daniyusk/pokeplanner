@@ -18,7 +18,7 @@ export function TypeBadge({ type, size = 'md', compact = false, className = '' }
 
   return (
     <span
-      className={`inline-flex items-center rounded-md font-semibold tracking-tight text-white shadow-xs select-none ${sizeClasses} ${className}`}
+      className={`inline-flex items-center rounded-md font-semibold tracking-tight text-white select-none ${sizeClasses} ${className}`}
       style={{ backgroundColor: colorVar }}
     >
       <TypeIcon
